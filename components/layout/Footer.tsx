@@ -236,13 +236,13 @@ const Footer: React.FC = () => {
 
               {/* Legal Links */}
               <div className="flex gap-6 text-sm">
-                <a href="/privacy" className="text-gray-400 hover:text-red-400 transition-colors">
+                <a href="/privacy-policy" className="text-gray-400 hover:text-red-400 transition-colors">
                   Privacy Policy
                 </a>
-                <a href="/terms" className="text-gray-400 hover:text-red-400 transition-colors">
+                <a href="/terms-of-service" className="text-gray-400 hover:text-red-400 transition-colors">
                   Terms of Service
                 </a>
-                <a href="/sitemap" className="text-gray-400 hover:text-red-400 transition-colors">
+                <a href="/sitemap.xml" className="text-gray-400 hover:text-red-400 transition-colors">
                   Sitemap
                 </a>
               </div>
