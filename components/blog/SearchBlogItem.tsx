@@ -52,9 +52,23 @@ const SearchBlogItem: React.FC<SearchBlogItemProps> = ({
 
   const isLCPCandidate = index < 3;
 
+  // Close social menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showSocialMenu) {
+        setShowSocialMenu(false);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [showSocialMenu]);
+
   return (
     <div className='max-w-[330px] bg-white dark:bg-gray-800 border border-red-900 dark:border-red-800 hover:shadow-[-7px_7px_0px_#8b0000bb] dark:hover:shadow-[-7px_7px_0px_#7f1d1d] transition-all duration-300 cursor-pointer mx-auto group'>
-      <Link href={`/posts/${slug}`}>
+      <Link href={`/posts/${slug}`} className="block">
         <div className="relative h-48 w-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
           {featuredImage?.node?.sourceUrl && !imageError ? (
             <>
@@ -93,30 +107,37 @@ const SearchBlogItem: React.FC<SearchBlogItemProps> = ({
       {/* Content */}
       <div className='p-5'>
         <div className='flex justify-between items-center mb-4'>
-          <span className='inline-block bg-red-900 dark:bg-red-800 text-white text-xs px-3 py-1 rounded-full font-medium'>
+          <span className='bg-red-900 dark:bg-red-800 text-white text-sm px-4 py-2 rounded-full font-medium min-h-11 flex items-center'>
             {category}
           </span>
           
           <div className="relative">
             <button
-              className="p-2 bg-gray-100 dark:bg-gray-700 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-              onClick={() => setShowSocialMenu(!showSocialMenu)}
+              className="p-3 bg-gray-100 dark:bg-gray-700 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowSocialMenu(!showSocialMenu);
+              }}
               aria-label="Share options"
+              style={{ minWidth: '44px', minHeight: '44px' }}
             >
-              <svg className="w-4 h-4 text-gray-600 dark:text-gray-300" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-gray-600 dark:text-gray-300" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/>
               </svg>
             </button>
 
             {showSocialMenu && (
-              <div className="absolute right-0 top-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-3 z-10">
+              <div 
+                className="absolute right-0 top-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-4 z-10 min-w-[200px]"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <SocialShareButtons title={title} slug={slug} excerpt={cleanExcerpt} />
               </div>
             )}
           </div>
         </div>
 
-        <Link href={`/posts/${slug}`}>
+        <Link href={`/posts/${slug}`} className="block">
           <h3 className='mb-3 text-lg font-semibold text-gray-900 dark:text-gray-100 line-clamp-2 min-h-14 leading-tight group-hover:text-red-700 dark:group-hover:text-red-400 transition-colors duration-200'>
             {title}
           </h3>
@@ -127,12 +148,12 @@ const SearchBlogItem: React.FC<SearchBlogItemProps> = ({
         </p>
 
         <div className='flex justify-between items-center pt-3 border-t border-gray-200 dark:border-gray-700'>
-          <span className='text-xs text-gray-500 dark:text-gray-400 font-medium'>
+          <span className='text-xs text-gray-500 dark:text-gray-400 font-medium py-2'>
             {formattedDate}
           </span>
           <Link
             href={`/posts/${slug}`}
-            className='inline-flex items-center font-medium text-red-900 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors text-sm group/link'
+            className='inline-flex items-center font-medium text-red-900 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors text-sm group/link px-4 py-3 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 min-h-11'
           >
             Read More
             <svg className='ml-2 w-4 h-4 transform group-hover/link:translate-x-1 transition-transform' fill="none" stroke="currentColor" viewBox="0 0 24 24">

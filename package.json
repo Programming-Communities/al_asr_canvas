@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "analyze": "ANALYZE=true next build",
+    "build:prod": "NODE_ENV=production next build"
   },
   "dependencies": {
     "@apollo/client": "^4.0.9",

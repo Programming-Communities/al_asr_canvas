@@ -1,12 +1,28 @@
 'use client';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Logo from '../shared/Logo';
 import Navigation from './Navigation';
 import ThemeToggle from '../shared/ThemeToggle';
 import SearchBar from '../shared/SearchBar';
+import MobileMenu from '../shared/MobileMenu';
 
 const Header: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+    };
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -15,7 +31,6 @@ const Header: React.FC = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Resize canvas to match header
     const resizeCanvas = () => {
       canvas.width = canvas.offsetWidth;
       canvas.height = canvas.offsetHeight;
@@ -24,7 +39,6 @@ const Header: React.FC = () => {
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    // Particle class
     class Particle {
       x = 0;
       y = 0;
@@ -130,11 +144,20 @@ const Header: React.FC = () => {
           <Logo />
           <Navigation />
           <div className="flex items-center gap-4">
-            <SearchBar />
+            {/* Desktop Search - Hidden on mobile */}
+            <div className="hidden md:block">
+              <SearchBar />
+            </div>
+            
+            {/* Mobile Menu */}
+            <MobileMenu />
+            
             <ThemeToggle />
           </div>
         </div>
 
+        {/* Mobile Search Overlay - Removed since it's now in MobileMenu */}
+        
         <div className="text-center my-12">
           <h1 className="text-4xl sm:text-6xl font-bold mb-4 leading-tight drop-shadow-lg">
             Al-Asr ( Islamic Service )

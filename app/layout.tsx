@@ -1,6 +1,12 @@
 import { ThemeProvider } from "@/components/shared/ThemeProvider";
 import "./globals.css";
 import { Metadata } from "next";
+import { Inter } from 'next/font/google'
+
+const inter = Inter({ 
+  subsets: ['latin'],
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   title: "Al-Asr ( Islamic Service )",
@@ -97,66 +103,6 @@ export default function RootLayout({ children }: RootLayoutProps) {
           href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap"
           rel="stylesheet"
         />
-        
-        {/* ✅ Preload critical fonts */}
-        <link
-          rel="preload"
-          href="https://fonts.gstatic.com/s/notonastaliqurdu/v20/LhWlMzb5Xumg7Yu1_mrqPfxxMduQdH0pY4k.woff2"
-          as="font"
-          type="font/woff2"
-          crossOrigin="anonymous"
-        />
-
-        {/* ✅ FOUC Prevention Script */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              // Prevent FOUC
-              document.addEventListener('DOMContentLoaded', function() {
-                document.body.classList.add('loaded');
-              });
-              // Initial body state
-              document.body.classList.add('loading');
-            `,
-          }}
-        />
-
-        {/* ✅ Inline tiny critical CSS */}
-        <style
-          dangerouslySetInnerHTML={{
-            __html: `
-              html, body {
-                margin: 0;
-                padding: 0;
-                font-family: 'Noto Sans Arabic', 'Noto Nastaliq Urdu', system-ui, -apple-system, sans-serif;
-                background-color: #ffffff;
-                color: #111827;
-                -webkit-font-smoothing: antialiased;
-              }
-              body.loading {
-                opacity: 0;
-                visibility: hidden;
-              }
-              body.loaded {
-                opacity: 1;
-                visibility: visible;
-                transition: opacity 0.3s ease-in-out;
-              }
-              .min-h-screen { min-height: 100vh; }
-              
-              /* Urdu/Arabic text styling */
-              .urdu-text {
-                font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', serif;
-                line-height: 1.8;
-                font-weight: 400;
-              }
-              .arabic-text {
-                font-family: 'Noto Sans Arabic', 'Noto Nastaliq Urdu', serif;
-                line-height: 1.6;
-              }
-            `,
-          }}
-        />
 
         {/* ✅ OG + Twitter Meta */}
         <meta property="og:image" content="https://al-asr.centers.pk/og-image.png" />
@@ -171,7 +117,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <meta name="darkreader-lock" />
       </head>
 
-      <body suppressHydrationWarning className="antialiased">
+      <body className={`${inter.className} antialiased`}>
         <ThemeProvider>
           <main role="main" id="main-content" tabIndex={-1}>
             {children}
