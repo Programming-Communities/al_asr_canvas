@@ -64,7 +64,7 @@ const EducationCard: React.FC<EducationCardProps> = ({ course }) => {
           href={course.discordLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="w-full inline-flex items-center justify-center px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold rounded-xl transition-all duration-300 transform group-hover:scale-105 shadow-lg text-sm"
+          className="w-full inline-flex items-center justify-center px-4 py-3 bg-linear-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold rounded-xl transition-all duration-300 transform group-hover:scale-105 shadow-lg text-sm"
         >
           <span className="mr-2">🎯</span>
           Join Class
