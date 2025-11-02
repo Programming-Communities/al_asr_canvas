@@ -3,6 +3,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Header from '@/components/layout/Header';
 import { Post } from '@/types/blog';
+import ReadingControls from '@/components/shared/ReadingControls'; // ✅ ADD THIS
+import { useState, useEffect } from 'react'; // ✅ ADD THIS
 
 // Social Sharing Component
 function PostSocialShareButtons({ title, slug, isRTL }: { 
@@ -29,7 +31,7 @@ function PostSocialShareButtons({ title, slug, isRTL }: {
     
       <button
         onClick={shareOnWhatsApp}
-        className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm"
+        className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm min-h-10"
         title="Share on WhatsApp"
       >
         <span>📱</span>
@@ -38,7 +40,7 @@ function PostSocialShareButtons({ title, slug, isRTL }: {
     
       <button
         onClick={shareOnFacebook}
-        className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
+        className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm min-h-10"
         title="Share on Facebook"
       >
         <span>🔵</span>
@@ -89,7 +91,7 @@ function PostMetaInfo({ post, isRTL }: {
           {post.categories.nodes.map((category, index) => (
             <span
               key={category.slug}
-              className={`inline-block bg-red-900 dark:bg-red-800 text-white text-xs px-3 py-1 rounded-full ${isRTL ? 'ml-2' : 'mr-2'} mb-2`}
+              className={`inline-block bg-red-900 dark:bg-red-800 text-white text-xs px-3 py-1 rounded-full ${isRTL ? 'ml-2' : 'mr-2'} mb-2 min-h-6 flex items-center`}
             >
               {category.name}
             </span>
@@ -112,11 +114,38 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
   const isContentRTL = isUrdu;
   const currentIsRTL = isTitleRTL || isContentRTL;
 
+  // ✅ ADD THESE STATE VARIABLES FOR READING CONTROLS
+  const [fontSize, setFontSize] = useState(100);
+  const [readingTheme, setReadingTheme] = useState<'light' | 'dark'>('light');
+
+  // ✅ APPLY FONT SIZE TO CONTENT
+  useEffect(() => {
+    const contentElement = document.getElementById('blog-content');
+    if (contentElement) {
+      contentElement.style.fontSize = `${fontSize}%`;
+      contentElement.style.lineHeight = fontSize > 115 ? '2.2' : '1.8';
+    }
+  }, [fontSize]);
+
+  // ✅ APPLY READING THEME
+  useEffect(() => {
+    const root = document.documentElement;
+    if (readingTheme === 'dark') {
+      root.classList.add('reading-dark');
+    } else {
+      root.classList.remove('reading-dark');
+    }
+  }, [readingTheme]);
+
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
+    <div className={`min-h-screen transition-colors duration-300 ${
+      readingTheme === 'dark' 
+        ? 'bg-gray-900 text-gray-100' 
+        : 'bg-white dark:bg-gray-900'
+    }`}>
       <Header />
     
-      <div className="py-8 bg-white dark:bg-gray-900">
+      <div className="py-8">
         <article
           className="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden"
           dir={currentIsRTL ? "rtl" : "ltr"}
@@ -140,9 +169,9 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
           <div className="p-6 md:p-8">
             {/* Title */}
             <h1
-              className={`text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6 leading-tight ${
+              className={`text-3xl md:text-4xl font-bold mb-6 leading-tight ${
                 currentIsRTL ? 'text-right' : 'text-left'
-              }`}
+              } ${readingTheme === 'dark' ? 'text-gray-100' : 'text-gray-900 dark:text-white'}`}
               style={{
                 fontFamily: currentIsRTL 
                   ? "'Noto Nastaliq Urdu', 'Noto Sans Arabic', serif" 
@@ -157,15 +186,14 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
 
             {/* Main Content */}
             <div
-              className={`wp-content max-w-none text-gray-700 dark:text-gray-300 ${
+              id="blog-content" // ✅ ADD THIS ID
+              className={`wp-content max-w-none transition-all duration-300 ${
                 currentIsRTL ? 'urdu-arabic-content' : 'english-content'
-              }`}
+              } ${readingTheme === 'dark' ? 'text-gray-300' : 'text-gray-700 dark:text-gray-300'}`}
               style={{
                 fontFamily: currentIsRTL 
                   ? "'Noto Nastaliq Urdu', 'Noto Sans Arabic', serif" 
                   : "system-ui, -apple-system, sans-serif",
-                lineHeight: currentIsRTL ? '2.2' : '1.8',
-                fontSize: currentIsRTL ? '1.2rem' : '1rem',
                 textAlign: currentIsRTL ? 'right' : 'left'
               }}
               dangerouslySetInnerHTML={{ __html: post.content }}
@@ -180,9 +208,9 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
             <div className={`mt-8 pt-6 border-t border-gray-200 dark:border-gray-700 ${currentIsRTL ? 'text-right' : 'text-left'}`}>
               <Link
                 href="/"
-                className={`inline-flex items-center text-red-900 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-semibold transition-colors ${
+                className={`inline-flex items-center font-semibold transition-colors ${
                   currentIsRTL ? 'flex-row-reverse' : ''
-                }`}
+                } ${readingTheme === 'dark' ? 'text-red-400 hover:text-red-300' : 'text-red-900 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300'}`}
               >
                 <svg
                   className={`${currentIsRTL ? 'ml-2 rotate-180' : 'mr-2'} w-4 h-4`}
@@ -199,10 +227,17 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
         </article>
       </div>
 
+      {/* ✅ ADD READING CONTROLS */}
+      <ReadingControls 
+        onFontSizeChange={setFontSize}
+        onThemeChange={setReadingTheme}
+      />
+
       {/* Global Styles for Content */}
       <style jsx global>{`
         .wp-content {
           color: inherit;
+          transition: all 0.3s ease;
         }
 
         .wp-content p {
@@ -229,9 +264,7 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
         /* Urdu/Arabic Content Styling */
         .urdu-arabic-content {
           font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', 'Scheherazade New', serif;
-          line-height: 2.2;
           text-align: right;
-          font-size: 1.2rem;
         }
 
         .urdu-arabic-content h1, 
@@ -242,7 +275,6 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
         .urdu-arabic-content h6 {
           font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', serif;
           text-align: right;
-          line-height: 2;
         }
 
         .urdu-arabic-content h1 { font-size: 2.8rem; }
@@ -255,7 +287,6 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
         /* English Content Styling */
         .english-content {
           font-family: system-ui, -apple-system, sans-serif;
-          line-height: 1.7;
           text-align: left;
         }
 
@@ -269,18 +300,23 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
           text-align: left;
         }
 
-        /* Dark mode support */
-        .dark .wp-content {
-          color: #e5e7eb;
+        /* Reading Dark Mode */
+        .reading-dark {
+          --tw-bg-opacity: 1;
+          background-color: rgb(17 24 39 / var(--tw-bg-opacity)) !important;
         }
 
-        .dark .wp-content h1,
-        .dark .wp-content h2,
-        .dark .wp-content h3,
-        .dark .wp-content h4,
-        .dark .wp-content h5,
-        .dark .wp-content h6 {
-          color: #f9fafb;
+        .reading-dark .wp-content {
+          color: rgb(209 213 219) !important;
+        }
+
+        .reading-dark .wp-content h1,
+        .reading-dark .wp-content h2,
+        .reading-dark .wp-content h3,
+        .reading-dark .wp-content h4,
+        .reading-dark .wp-content h5,
+        .reading-dark .wp-content h6 {
+          color: rgb(249 250 251) !important;
         }
 
         /* Responsive */
@@ -292,7 +328,6 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
           .urdu-arabic-content h1 { font-size: 2.2rem; }
           .urdu-arabic-content h2 { font-size: 1.9rem; }
           .urdu-arabic-content h3 { font-size: 1.6rem; }
-          .urdu-arabic-content { font-size: 1.1rem; }
         }
       `}</style>
     </div>

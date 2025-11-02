@@ -1,80 +1,83 @@
-'use client';
-import React from 'react';
-import { 
-  Facebook, 
-  Instagram, 
-  Twitter, 
-  Youtube, 
+"use client";
+import React from "react";
+import {
+  Facebook,
+  Instagram,
+  Twitter,
+  Youtube,
   Mail,
   Phone,
   MapPin,
   Heart,
   Shield,
   Users,
-  Calendar
-} from 'lucide-react';
+  Calendar,
+} from "lucide-react";
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
 
   const quickLinks = [
-    { name: 'Home', href: '/' },
-    { name: 'About Us', href: '/about' },
-    { name: 'Services', href: '/services' },
-    { name: 'Events', href: '/events' },
-    { name: 'Prayer Times', href: '/prayer-times' },
-    { name: 'Contact', href: '/contact' }
+    { name: "Home", href: "/" },
+    { name: "About Us", href: "/about" },
+    { name: "Services", href: "/services" },
+    { name: "Events", href: "/events" },
+    { name: "Prayer Times", href: "/prayer-times" },
+    { name: "Contact", href: "/contact" },
   ];
 
   const services = [
-    { name: 'Islamic Calendar', href: '/islamic-calendar' },
-    { name: 'Quran Classes', href: '/quran-classes' },
-    { name: 'Community Programs', href: '/community-programs' },
-    { name: 'Religious Guidance', href: '/guidance' },
-    { name: 'Education Services', href: '/education-services' },
-    { name: 'Funeral Services', href: '/funeral-services' }
+    { name: "Islamic Calendar", href: "/islamic-calendar" },
+    { name: "Quran Classes", href: "/quran-classes" },
+    { name: "Community Programs", href: "/community-programs" },
+    { name: "Religious Guidance", href: "/guidance" },
+    { name: "Education Services", href: "/education-services" },
+    { name: "Funeral Services", href: "/funeral-services" },
   ];
 
   const socialLinks = [
-    { 
-      icon: Facebook, 
-      href: '#', 
-      label: 'Facebook',
-      color: 'hover:bg-blue-600'
+    {
+      icon: Facebook,
+      href: "#",
+      label: "Facebook",
+      color: "hover:bg-blue-600",
     },
-    { 
-      icon: Instagram, 
-      href: '#', 
-      label: 'Instagram',
-      color: 'hover:bg-pink-600'
+    {
+      icon: Instagram,
+      href: "#",
+      label: "Instagram",
+      color: "hover:bg-pink-600",
     },
-    { 
-      icon: Twitter, 
-      href: '#', 
-      label: 'Twitter',
-      color: 'hover:bg-sky-500'
+    {
+      icon: Twitter,
+      href: "#",
+      label: "Twitter",
+      color: "hover:bg-sky-500",
     },
-    { 
-      icon: Youtube, 
-      href: '#', 
-      label: 'YouTube',
-      color: 'hover:bg-red-600'
+    {
+      icon: Youtube,
+      href: "#",
+      label: "YouTube",
+      color: "hover:bg-red-600",
     },
-    { 
-      icon: Mail, 
-      href: 'mailto:info@al-asr.com', 
-      label: 'Email',
-      color: 'hover:bg-green-600'
-    }
+    {
+      icon: Mail,
+      href: "mailto:info@al-asr.com",
+      label: "Email",
+      color: "hover:bg-green-600",
+    },
   ];
 
   return (
     <footer className="bg-linear-to-b from-gray-900 to-black text-white relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-5">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-        }} />
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          }}
+        />
       </div>
 
       <div className="relative z-10">
@@ -92,10 +95,10 @@ const Footer: React.FC = () => {
                   <p className="text-red-300 text-sm">Islamic Service Center</p>
                 </div>
               </div>
-              
+
               <p className="text-gray-300 mb-6 leading-relaxed">
-                Your trusted platform for Islamic services, community programs, 
-                and spiritual guidance. Serving the Muslim community with faith 
+                Your trusted platform for Islamic services, community programs,
+                and spiritual guidance. Serving the Muslim community with faith
                 and dedication.
               </p>
 
@@ -125,7 +128,7 @@ const Footer: React.FC = () => {
               <ul className="space-y-3">
                 {quickLinks.map((link) => (
                   <li key={link.name}>
-                    <a 
+                    <a
                       href={link.href}
                       className="text-gray-300 hover:text-red-400 transition-colors duration-200 flex items-center gap-2 group"
                     >
@@ -146,7 +149,7 @@ const Footer: React.FC = () => {
               <ul className="space-y-3">
                 {services.map((service) => (
                   <li key={service.name}>
-                    <a 
+                    <a
                       href={service.href}
                       className="text-gray-300 hover:text-red-400 transition-colors duration-200 flex items-center gap-2 group"
                     >
@@ -171,8 +174,8 @@ const Footer: React.FC = () => {
                   Subscribe to our newsletter for updates
                 </p>
                 <div className="flex gap-2">
-                  <input 
-                    type="email" 
+                  <input
+                    type="email"
                     placeholder="Your email"
                     className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm"
                   />
@@ -184,7 +187,9 @@ const Footer: React.FC = () => {
 
               {/* Social Media */}
               <div>
-                <p className="text-gray-300 text-sm mb-3">Follow us on social media</p>
+                <p className="text-gray-300 text-sm mb-3">
+                  Follow us on social media
+                </p>
                 <div className="flex gap-2">
                   {socialLinks.map((social) => {
                     const Icon = social.icon;
@@ -205,13 +210,13 @@ const Footer: React.FC = () => {
 
               {/* Auth Buttons */}
               <div className="mt-6 flex gap-3">
-                <a 
+                <a
                   href="/login"
                   className="flex-1 px-4 py-2 border border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-all duration-200 text-center text-sm font-medium"
                 >
                   Login
                 </a>
-                <a 
+                <a
                   href="/signup"
                   className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all duration-200 text-center text-sm font-medium"
                 >
@@ -230,19 +235,38 @@ const Footer: React.FC = () => {
               <div className="flex items-center gap-2 text-gray-400 text-sm">
                 <span>© {currentYear} Al-Asr Islamic Service Center.</span>
                 <span className="flex items-center gap-1">
-                  Made with <Heart className="w-4 h-4 text-red-400 fill-current" /> for the community
+                  Made with{" "}
+                  <Heart className="w-4 h-4 text-red-400 fill-current" /> for
+                  the community by{" "}
+                  <a
+                    href="https://programming.communities.pk"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-red-400 hover:text-red-300 underline transition-colors duration-200 font-medium"
+                  >
+                    Programming Communities
+                  </a>
                 </span>
               </div>
 
               {/* Legal Links */}
               <div className="flex gap-6 text-sm">
-                <a href="/privacy-policy" className="text-gray-400 hover:text-red-400 transition-colors">
+                <a
+                  href="/privacy-policy"
+                  className="text-gray-400 hover:text-red-400 transition-colors"
+                >
                   Privacy Policy
                 </a>
-                <a href="/terms-of-service" className="text-gray-400 hover:text-red-400 transition-colors">
+                <a
+                  href="/terms-of-service"
+                  className="text-gray-400 hover:text-red-400 transition-colors"
+                >
                   Terms of Service
                 </a>
-                <a href="/sitemap.xml" className="text-gray-400 hover:text-red-400 transition-colors">
+                <a
+                  href="/sitemap.xml"
+                  className="text-gray-400 hover:text-red-400 transition-colors"
+                >
                   Sitemap
                 </a>
               </div>
