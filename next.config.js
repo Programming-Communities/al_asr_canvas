@@ -15,7 +15,7 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'al-asr.centers.pk',
+        hostname: 'al-asr.centers.pk', 
         pathname: '/**',
       },
       {
@@ -40,7 +40,7 @@ const nextConfig = {
             value: 'nosniff'
           },
           {
-            key: 'X-Frame-Options',
+            key: 'X-Frame-Options', 
             value: 'DENY'
           },
           {
