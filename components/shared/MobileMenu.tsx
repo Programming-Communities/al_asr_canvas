@@ -2,121 +2,159 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import SearchBar from './SearchBar';
+import { 
+  X, 
+  Search, 
+  Home, 
+  Info, 
+  Settings, 
+  Mail, 
+  BookOpen, 
+  Calendar,
+  Users,
+  GraduationCap,
+  Heart
+} from 'lucide-react';
 
 const MobileMenu: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
 
   const menuItems = [
-    { name: 'Home', href: '/' },
-    { name: 'About', href: '/about' },
-    { name: 'Services', href: '/services' },
-    { name: 'Contact', href: '/contact' },
-    { name: 'Blog', href: '/blog' },
-    { name: 'Events', href: '/events' },
+    { name: 'Home', href: '/', icon: Home, color: 'text-blue-500' },
+    { name: 'About', href: '/about', icon: Info, color: 'text-green-500' },
+    { name: 'Services', href: '/services', icon: Settings, color: 'text-purple-500' },
+    { name: 'Islamic Calendar', href: '/islamic-calendar', icon: Calendar, color: 'text-orange-500' },
+    { name: 'Quran Classes', href: '/quran-classes', icon: BookOpen, color: 'text-cyan-500' },
+    { name: 'Religious Guidance', href: '/religious-guidance', icon: GraduationCap, color: 'text-yellow-500' },
+    { name: 'Community Programs', href: '/community-programs', icon: Users, color: 'text-pink-500' },
+    { name: 'Funeral Services', href: '/funeral-services', icon: Heart, color: 'text-red-500' },
+    { name: 'Contact', href: '/contact', icon: Mail, color: 'text-indigo-500' },
   ];
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
+    if (isOpen) {
+      setShowSearch(false);
+    }
   };
 
   const closeMenu = () => {
     setIsOpen(false);
+    setShowSearch(false);
   };
 
   return (
     <>
-      {/* Mobile Menu Button */}
+      {/* Modern Menu Button */}
       <button
         onClick={toggleMenu}
-        className="md:hidden p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors min-w-11 min-h-11 flex items-center justify-center"
+        className="md:hidden relative p-3 rounded-2xl bg-linear-to-br from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white transition-all duration-300 transform hover:scale-105 hover:shadow-2xl min-w-12 min-h-12 flex items-center justify-center group"
         aria-label="Toggle menu"
       >
-        <svg
-          className="w-6 h-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          {isOpen ? (
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M6 18L18 6M6 6l12 12"
-            />
-          ) : (
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 6h16M4 12h16M4 18h16"
-            />
-          )}
-        </svg>
+        {/* Animated Hamburger Icon */}
+        <div className="relative w-6 h-6">
+          <span className={`absolute top-1 left-0 w-6 h-0.5 bg-white rounded-full transition-all duration-300 ${
+            isOpen ? 'rotate-45 top-3' : ''
+          }`} />
+          <span className={`absolute top-3 left-0 w-6 h-0.5 bg-white rounded-full transition-all duration-300 ${
+            isOpen ? 'opacity-0' : ''
+          }`} />
+          <span className={`absolute top-5 left-0 w-6 h-0.5 bg-white rounded-full transition-all duration-300 ${
+            isOpen ? '-rotate-45 top-3' : ''
+          }`} />
+        </div>
+        
+        {/* Pulse Animation */}
+        <div className="absolute inset-0 rounded-2xl border-2 border-red-400/30 group-hover:border-red-300/50 transition-all duration-300" />
       </button>
 
-      {/* Mobile Menu Overlay */}
+      {/* Modern Menu Overlay */}
       {isOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
-          {/* Backdrop */}
+          {/* Glass Morphism Backdrop */}
           <div
-            className="absolute inset-0 bg-black bg-opacity-50"
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={closeMenu}
           />
           
-          {/* Menu Panel */}
-          <div className="absolute right-0 top-0 h-full w-80 bg-white dark:bg-gray-900 shadow-xl transform transition-transform">
-            {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                Menu
-              </h2>
-              <button
-                onClick={closeMenu}
-                className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors min-w-10 min-h-10"
-                aria-label="Close menu"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+          {/* Modern Menu Panel */}
+          <div className="absolute right-0 top-0 h-full w-80 bg-linear-to-b from-gray-900 via-gray-800 to-gray-900 shadow-2xl border-l border-gray-700 transform transition-transform duration-500 ease-out">
+            {/* Header with Gradient */}
+            <div className="relative p-6 bg-linear-to-r from-red-600 to-red-700">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-white">Navigation</h2>
+                  <p className="text-red-100 text-sm mt-1">Al-Asr Islamic Service</p>
+                </div>
+                <button
+                  onClick={closeMenu}
+                  className="p-2 text-white hover:bg-white/20 rounded-xl transition-all duration-200 transform hover:scale-110 min-w-10 min-h-10 flex items-center justify-center"
+                  aria-label="Close menu"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              
+              {/* Decorative Elements */}
+              <div className="absolute bottom-0 left-0 right-0 h-1 bg-linear-to-r from-transparent via-white/30 to-transparent" />
             </div>
 
             {/* Search Section */}
-            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-              <div className="flex items-center gap-3 mb-4">
-                <button
-                  onClick={() => setShowSearch(!showSearch)}
-                  className="flex items-center gap-3 p-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors w-full min-h-11"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            <div className="p-6 border-b border-gray-700">
+              <div 
+                className="flex items-center gap-3 p-4 bg-gray-800 rounded-2xl border border-gray-700 hover:border-red-500/50 transition-all duration-300 cursor-pointer group"
+                onClick={() => setShowSearch(!showSearch)}
+              >
+                <div className="flex items-center justify-center w-10 h-10 bg-red-600 rounded-xl group-hover:bg-red-700 transition-colors">
+                  <Search className="w-5 h-5 text-white" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-white font-medium">Search Posts</p>
+                  <p className="text-gray-400 text-sm">Find Islamic content</p>
+                </div>
+                <div className={`transform transition-transform duration-300 ${
+                  showSearch ? 'rotate-180' : ''
+                }`}>
+                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
-                  <span className="font-medium">Search</span>
-                </button>
+                </div>
               </div>
 
+              {/* Animated Search Bar */}
               {showSearch && (
-                <div className="mt-4">
-                  <SearchBar onSearch={closeMenu} />
+                <div className="mt-4 animate-in fade-in duration-300">
+                  <SearchBar onSearch={closeMenu} compact />
                 </div>
               )}
             </div>
 
-            {/* Navigation Links */}
-            <nav className="p-6">
-              <ul className="space-y-2">
-                {menuItems.map((item) => (
-                  <li key={item.name}>
+            {/* Navigation Links with Icons */}
+            <nav className="p-6 flex-1 overflow-y-auto">
+              <div className="space-y-2">
+                {menuItems.map((item) => {
+                  const IconComponent = item.icon;
+                  return (
                     <Link
+                      key={item.name}
                       href={item.href}
                       onClick={closeMenu}
-                      className="flex items-center gap-4 p-4 text-gray-700 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-700 dark:hover:text-red-400 rounded-lg transition-all duration-200 group min-h-12"
+                      className="group relative flex items-center gap-4 p-4 text-gray-300 hover:text-white bg-gray-800 hover:bg-linear-to-r hover:from-red-600/20 hover:to-red-700/20 rounded-2xl border border-gray-700 hover:border-red-500/30 transition-all duration-300 transform hover:scale-105 hover:shadow-lg min-h-14"
                     >
-                      <span className="font-medium text-lg">{item.name}</span>
+                      {/* Icon Container */}
+                      <div className={`flex items-center justify-center w-10 h-10 rounded-xl bg-gray-700 group-hover:bg-red-600 transition-all duration-300 ${item.color}`}>
+                        <IconComponent className="w-5 h-5" />
+                      </div>
+                      
+                      {/* Text Content */}
+                      <div className="flex-1">
+                        <span className="font-medium text-lg">{item.name}</span>
+                      </div>
+                      
+                      {/* Animated Arrow */}
                       <svg
-                        className="w-4 h-4 transform group-hover:translate-x-1 transition-transform ml-auto"
+                        className="w-4 h-4 text-gray-500 group-hover:text-red-400 transform group-hover:translate-x-1 transition-all duration-300"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -128,47 +166,52 @@ const MobileMenu: React.FC = () => {
                           d="M9 5l7 7-7 7"
                         />
                       </svg>
+
+                      {/* Hover Border Effect */}
+                      <div className="absolute inset-0 rounded-2xl border-2 border-transparent group-hover:border-red-500/20 transition-all duration-300" />
                     </Link>
-                  </li>
-                ))}
-              </ul>
+                  );
+                })}
+              </div>
             </nav>
 
-            {/* Footer Section */}
-            <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-gray-200 dark:border-gray-700">
-              <div className="text-center">
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-                  Al-Asr Islamic Service
+            {/* Footer with Social Links */}
+            <div className="p-6 border-t border-gray-700 bg-gray-800/50">
+              <div className="text-center mb-4">
+                <p className="text-gray-400 text-sm mb-3">
+                  Connect with us
                 </p>
-                <div className="flex justify-center space-x-4">
-                  <a
-                    href="#"
-                    className="p-2 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-colors"
-                    aria-label="Facebook"
-                  >
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                    </svg>
-                  </a>
-                  <a
-                    href="#"
-                    className="p-2 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-colors"
-                    aria-label="Twitter"
-                  >
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
-                    </svg>
-                  </a>
-                  <a
-                    href="#"
-                    className="p-2 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-colors"
-                    aria-label="Instagram"
-                  >
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 6.62 5.367 11.987 11.988 11.987s11.987-5.367 11.987-11.987C24.014 5.367 18.647.001 12.017.001zM8.449 16.988c-1.297 0-2.448-.49-3.323-1.297C4.24 14.865 3.75 13.714 3.75 12.417s.49-2.448 1.376-3.323c.875-.807 2.026-1.297 3.323-1.297s2.448.49 3.323 1.297c.886.875 1.376 2.026 1.376 3.323s-.49 2.448-1.376 3.323c-.875.807-2.026 1.297-3.323 1.297z"/>
-                    </svg>
-                  </a>
+                <div className="flex justify-center space-x-3">
+                  {[
+                    { icon: '📘', label: 'Facebook', color: 'hover:bg-blue-500' },
+                    { icon: '🐦', label: 'Twitter', color: 'hover:bg-sky-500' },
+                    { icon: '📷', label: 'Instagram', color: 'hover:bg-pink-500' },
+                    { icon: '📱', label: 'WhatsApp', color: 'hover:bg-green-500' }
+                  ].map((social) => (
+                    <button
+                      key={social.label}
+                      className={`w-10 h-10 bg-gray-700 rounded-xl text-gray-300 hover:text-white transition-all duration-300 transform hover:scale-110 flex items-center justify-center ${social.color}`}
+                      aria-label={social.label}
+                    >
+                      <span className="text-lg">{social.icon}</span>
+                    </button>
+                  ))}
                 </div>
+              </div>
+              
+              {/* Made with Love */}
+              <div className="text-center pt-4 border-t border-gray-700">
+                <p className="text-gray-500 text-xs flex items-center justify-center gap-1">
+                  Made with <Heart className="w-3 h-3 text-red-400 fill-current" /> by{' '}
+                  <a 
+                    href="https://programming.communities.pk" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-red-400 hover:text-red-300 underline transition-colors"
+                  >
+                    Programming Communities
+                  </a>
+                </p>
               </div>
             </div>
           </div>
