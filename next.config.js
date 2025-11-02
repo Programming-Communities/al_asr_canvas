@@ -15,7 +15,7 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'al-asr.centers.pk', 
+        hostname: 'al-asr.centers.pk',
         pathname: '/**',
       },
       {
@@ -30,6 +30,10 @@ const nextConfig = {
     minimumCacheTTL: 31536000,
   },
   productionBrowserSourceMaps: false,
+  
+  // ✅ ADD THIS FOR MODERN BROWSERS - REMOVE LEGACY POLYFILLS
+  transpilePackages: [],
+  
   async headers() {
     return [
       {
@@ -40,7 +44,7 @@ const nextConfig = {
             value: 'nosniff'
           },
           {
-            key: 'X-Frame-Options', 
+            key: 'X-Frame-Options',
             value: 'DENY'
           },
           {

@@ -1,17 +1,17 @@
-"use client";
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import SocialShareButtons from "../shared/SocialShareButtons";
-import { Post } from "@/types/blog";
-import {
-  Calendar,
-  Clock,
-  ArrowRight,
+'use client';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import SocialShareButtons from '../shared/SocialShareButtons';
+import { Post } from '@/types/blog';
+import { 
+  Calendar, 
+  Clock, 
+  ArrowRight, 
   Image as ImageIcon,
   Share2,
-  Eye,
-} from "lucide-react";
+  Eye
+} from 'lucide-react';
 
 interface BlogItemProps extends Post {
   index?: number;
@@ -28,7 +28,7 @@ const BlogItem: React.FC<BlogItemProps> = ({
   slug,
   index = 0,
   readingTime = 3,
-  views = 0,
+  views = 0
 }) => {
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
@@ -38,21 +38,21 @@ const BlogItem: React.FC<BlogItemProps> = ({
   // Memoized clean excerpt
   const cleanExcerpt = useMemo(() => {
     return excerpt
-      ? excerpt.replace(/<[^>]*>/g, "").substring(0, 120) + "..."
-      : "Discover insights and valuable information in this post...";
+      ? excerpt.replace(/<[^>]*>/g, '').substring(0, 120) + '...'
+      : 'Discover insights and valuable information in this post...';
   }, [excerpt]);
 
   // Memoized category
   const category = useMemo(() => {
-    return categories?.nodes?.[0]?.name || "Islamic Insights";
+    return categories?.nodes?.[0]?.name || 'Islamic Insights';
   }, [categories]);
 
   // Memoized formatted date
   const formattedDate = useMemo(() => {
-    return new Date(date).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
+    return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
     });
   }, [date]);
 
@@ -61,7 +61,7 @@ const BlogItem: React.FC<BlogItemProps> = ({
 
   // Optimized image URL handler
   const getOptimizedImageUrl = useCallback((url: string) => {
-    if (!url) return "";
+    if (!url) return '';
     // Add image optimization parameters if needed
     return url;
   }, []);
@@ -74,8 +74,8 @@ const BlogItem: React.FC<BlogItemProps> = ({
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showSocialMenu]);
 
   // Animation delay based on index
@@ -84,7 +84,7 @@ const BlogItem: React.FC<BlogItemProps> = ({
   }, [index]);
 
   return (
-    <article
+    <article 
       className="group relative max-w-[360px] bg-white dark:bg-gray-900 border-2 border-red-900/20 dark:border-red-800/30 rounded-xl hover:border-red-900/40 dark:hover:border-red-800/60 hover:shadow-[-8px_8px_0px_#991b1b] dark:hover:shadow-[-8px_8px_0px_#7f1d1d] transition-all duration-500 ease-out cursor-pointer mx-auto overflow-hidden"
       style={{ animationDelay }}
       onMouseEnter={() => setIsHovered(true)}
@@ -95,37 +95,36 @@ const BlogItem: React.FC<BlogItemProps> = ({
         <Link href={`/posts/${slug}`} className="block h-full">
           {featuredImage?.node?.sourceUrl && !imageError ? (
             <>
-              // Line ~50 ke around Image component mein
               <Image
                 src={getOptimizedImageUrl(featuredImage.node.sourceUrl)}
                 alt={featuredImage.node.altText || title}
                 fill
                 className={`object-cover transition-all duration-700 ${
-                  isHovered ? "scale-110 rotate-1" : "scale-100"
+                  isHovered ? 'scale-110 rotate-1' : 'scale-100'
                 }`}
                 onError={() => setImageError(true)}
                 onLoad={() => setImageLoading(false)}
                 loading={isLCPCandidate ? "eager" : "lazy"}
                 priority={isLCPCandidate}
-                fetchPriority={isLCPCandidate ? "high" : "auto"} // ✅ YEH ADD KARO
+                fetchPriority={isLCPCandidate ? "high" : "auto"} // ✅ LCP OPTIMIZATION
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                quality={75} // ✅ 85 se 75 kar do
+                quality={75} // ✅ REDUCED FROM 85 FOR BETTER PERFORMANCE
+                placeholder="blur"
+                blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
               />
+              
               {/* Loading Skeleton */}
               {imageLoading && (
                 <div className="absolute inset-0 bg-gray-200 dark:bg-gray-700 animate-pulse z-10 flex items-center justify-center">
                   <div className="flex flex-col items-center gap-2">
                     <ImageIcon className="w-6 h-6 text-gray-400 dark:text-gray-500" />
-                    <span className="text-gray-500 dark:text-gray-400 text-sm">
-                      Loading...
-                    </span>
+                    <span className="text-gray-500 dark:text-gray-400 text-sm">Loading...</span>
                   </div>
                 </div>
               )}
+
               {/* Hover Overlay */}
-              <div
-                className={`absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4`}
-              >
+              <div className={`absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4`}>
                 <span className="text-white text-sm font-medium bg-red-900/80 px-3 py-1 rounded-full backdrop-blur-sm">
                   Read Article
                 </span>
@@ -137,7 +136,7 @@ const BlogItem: React.FC<BlogItemProps> = ({
               <div className="text-center p-6">
                 <ImageIcon className="w-12 h-12 text-red-300 dark:text-gray-600 mx-auto mb-3" />
                 <p className="text-red-400 dark:text-gray-400 text-sm font-medium">
-                  {imageError ? "Image Loading Failed" : "Featured Image"}
+                  {imageError ? 'Image Loading Failed' : 'Featured Image'}
                 </p>
               </div>
             </div>
@@ -215,9 +214,9 @@ const BlogItem: React.FC<BlogItemProps> = ({
                 <div className="mb-2 text-xs font-semibold text-gray-500 dark:text-gray-400">
                   Share this post
                 </div>
-                <SocialShareButtons
-                  title={title}
-                  slug={slug}
+                <SocialShareButtons 
+                  title={title} 
+                  slug={slug} 
                   excerpt={cleanExcerpt}
                 />
               </div>

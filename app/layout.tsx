@@ -71,9 +71,32 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <meta name="theme-color" content="#991b1b" />
         
         {/* ✅ Apple Touch Icons */}
-        {/* ✅ Add this in your head section */}
         <link rel="preconnect" href="https://admin-al-asr.centers.pk" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://admin-al-asr.centers.pk" />
+        
+        {/* ✅ ADD CRITICAL IMAGE PRELOADS */}
+        <link
+          rel="preload"
+          href="/android/android-launchericon-48-48.png"
+          as="image"
+          type="image/png"
+        />
+        <link
+          rel="preload"
+          href="/og-image.png"
+          as="image"
+          type="image/png"
+        />
+        
+        {/* ✅ ADD FONT PRELOADS */}
+        <link
+          rel="preload"
+          href="https://fonts.gstatic.com/s/notonastaliqurdu/v20/LhWlMzb5Xumg7Yu1_mrqPfxxMduQdH0pY4k.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        
         <link rel="apple-touch-icon" href="/ios/180.png" />
         <link rel="apple-touch-icon" sizes="152x152" href="/ios/152.png" />
         <link rel="apple-touch-icon" sizes="180x180" href="/ios/180.png" />

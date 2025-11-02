@@ -13,7 +13,8 @@ import {
   Calendar,
   Users,
   GraduationCap,
-  Heart
+  Heart,
+  Sparkles // ✅ ADD THIS ICON FOR EVENTS
 } from 'lucide-react';
 
 const MobileMenu: React.FC = () => {
@@ -24,12 +25,13 @@ const MobileMenu: React.FC = () => {
     { name: 'Home', href: '/', icon: Home, color: 'text-blue-500' },
     { name: 'About', href: '/about', icon: Info, color: 'text-green-500' },
     { name: 'Services', href: '/services', icon: Settings, color: 'text-purple-500' },
+    { name: 'Events', href: '/events', icon: Sparkles, color: 'text-indigo-500' }, // ✅ ADDED EVENTS
     { name: 'Islamic Calendar', href: '/islamic-calendar', icon: Calendar, color: 'text-orange-500' },
     { name: 'Quran Classes', href: '/quran-classes', icon: BookOpen, color: 'text-cyan-500' },
     { name: 'Religious Guidance', href: '/religious-guidance', icon: GraduationCap, color: 'text-yellow-500' },
     { name: 'Community Programs', href: '/community-programs', icon: Users, color: 'text-pink-500' },
     { name: 'Funeral Services', href: '/funeral-services', icon: Heart, color: 'text-red-500' },
-    { name: 'Contact', href: '/contact', icon: Mail, color: 'text-indigo-500' },
+    { name: 'Contact', href: '/contact', icon: Mail, color: 'text-gray-400' },
   ];
 
   const toggleMenu = () => {

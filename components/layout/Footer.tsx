@@ -30,7 +30,7 @@ const Footer: React.FC = () => {
     { name: "Islamic Calendar", href: "/islamic-calendar" },
     { name: "Quran Classes", href: "/quran-classes" },
     { name: "Community Programs", href: "/community-programs" },
-    { name: "Religious Guidance", href: "/guidance" },
+    { name: "Religious Guidance", href: "/religious-guidance" },
     { name: "Education Services", href: "/education-services" },
     { name: "Funeral Services", href: "/funeral-services" },
   ];

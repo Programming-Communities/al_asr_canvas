@@ -2,6 +2,22 @@
   "name": "al_asr",
   "version": "0.1.0",
   "private": true,
+  
+  
+  "browserslist": {
+    "production": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version",
+      "last 1 edge version"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  
   "scripts": {
     "dev": "next dev",
     "build": "next build",
