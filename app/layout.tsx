@@ -1,6 +1,6 @@
 import { ThemeProvider } from "@/components/shared/ThemeProvider";
 import "./globals.css";
-import { Metadata } from "next";
+import { Metadata, Viewport } from "next";
 import { Inter } from 'next/font/google'
 
 const inter = Inter({ 
@@ -43,7 +43,28 @@ export const metadata: Metadata = {
   },
   robots: { index: true, follow: true },
   alternates: { canonical: "https://al-asr.centers.pk" },
+  // ✅ PWA Metadata
+  applicationName: "Al-Asr Islamic Service",
+  authors: [{ name: "Al-Asr Islamic Service" }],
+  generator: "Next.js",
+  keywords: ["islamic", "prayer", "quran", "muslim", "community", "religious"],
+  creator: "Al-Asr Islamic Service",
+  publisher: "Al-Asr Islamic Service",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
 };
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: '#991b1b',
+  colorScheme: 'light',
+}
 
 interface RootLayoutProps {
   children: React.ReactNode;
@@ -69,6 +90,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <meta name="msapplication-TileColor" content="#991b1b" />
         <meta name="msapplication-tap-highlight" content="no" />
         <meta name="theme-color" content="#991b1b" />
+        <meta name="msapplication-config" content="/browserconfig.xml" />
         
         {/* ✅ Apple Touch Icons */}
         <link rel="preconnect" href="https://admin-al-asr.centers.pk" crossOrigin="anonymous" />
@@ -83,7 +105,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <link rel="manifest" href="/manifest.json" />
         
         {/* ✅ Basic Meta */}
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
         <link rel="icon" href="/android/android-launchericon-48-48.png" />
 
         {/* ✅ Preconnect + Prefetch */}
@@ -119,6 +141,70 @@ export default function RootLayout({ children }: RootLayoutProps) {
         {/* ✅ Prevent dark-mode filter */}
         <meta name="darkreader-lock" />
 
+        {/* ✅ PWA Install Prompt */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // PWA Install Prompt
+              let deferredPrompt;
+              window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                
+                // Show install button
+                const installButton = document.getElementById('install-button');
+                if (installButton) {
+                  installButton.style.display = 'block';
+                  installButton.addEventListener('click', async () => {
+                    if (deferredPrompt) {
+                      deferredPrompt.prompt();
+                      const { outcome } = await deferredPrompt.userChoice;
+                      if (outcome === 'accepted') {
+                        deferredPrompt = null;
+                      }
+                    }
+                  });
+                }
+              });
+
+              // Detect device type for responsive PWA
+              function detectDeviceType() {
+                const userAgent = navigator.userAgent;
+                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+                const isTablet = /iPad|Android/i.test(userAgent) && !/Mobile/i.test(userAgent);
+                
+                if (isMobile) {
+                  document.documentElement.classList.add('mobile-device');
+                } else if (isTablet) {
+                  document.documentElement.classList.add('tablet-device');
+                } else {
+                  document.documentElement.classList.add('desktop-device');
+                }
+              }
+              
+              // Load fonts after critical content
+              function loadFonts() {
+                const link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = 'https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap';
+                document.head.appendChild(link);
+              }
+              
+              // Initialize on load
+              window.addEventListener('load', () => {
+                detectDeviceType();
+                
+                // Load fonts when page is idle
+                if ('requestIdleCallback' in window) {
+                  window.requestIdleCallback(loadFonts);
+                } else {
+                  setTimeout(loadFonts, 500);
+                }
+              });
+            `,
+          }}
+        />
+
         {/* ✅ Critical CSS Inline */}
         <style
           dangerouslySetInnerHTML={{
@@ -145,39 +231,49 @@ export default function RootLayout({ children }: RootLayoutProps) {
                 white-space: nowrap;
                 border: 0;
               }
+              
+              /* PWA Responsive Classes */
+              .mobile-device .desktop-only {
+                display: none !important;
+              }
+              .desktop-device .mobile-only {
+                display: none !important;
+              }
+              .tablet-device .mobile-only {
+                display: none !important;
+              }
+              
+              /* Install Button */
+              #install-button {
+                display: none;
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                z-index: 1000;
+                background: #991b1b;
+                color: white;
+                border: none;
+                padding: 10px 15px;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 14px;
+              }
             `,
           }}
         />
       </head>
 
       <body className={`${inter.className} antialiased`}>
+        {/* PWA Install Button */}
+        <button id="install-button" className="hidden md:flex">
+          📱 Install App
+        </button>
+
         <ThemeProvider>
           <main role="main" id="main-content" tabIndex={-1}>
             {children}
           </main>
         </ThemeProvider>
-
-        {/* ✅ Font Loading Script */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              // Load fonts after critical content
-              function loadFonts() {
-                const link = document.createElement('link');
-                link.rel = 'stylesheet';
-                link.href = 'https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap';
-                document.head.appendChild(link);
-              }
-              
-              // Load fonts when page is idle
-              if ('requestIdleCallback' in window) {
-                window.requestIdleCallback(loadFonts);
-              } else {
-                setTimeout(loadFonts, 500);
-              }
-            `,
-          }}
-        />
       </body>
     </html>
   );
