@@ -74,29 +74,6 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <link rel="preconnect" href="https://admin-al-asr.centers.pk" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://admin-al-asr.centers.pk" />
         
-        {/* ✅ ADD CRITICAL IMAGE PRELOADS */}
-        <link
-          rel="preload"
-          href="/android/android-launchericon-48-48.png"
-          as="image"
-          type="image/png"
-        />
-        <link
-          rel="preload"
-          href="/og-image.png"
-          as="image"
-          type="image/png"
-        />
-        
-        {/* ✅ ADD FONT PRELOADS */}
-        <link
-          rel="preload"
-          href="https://fonts.gstatic.com/s/notonastaliqurdu/v20/LhWlMzb5Xumg7Yu1_mrqPfxxMduQdH0pY4k.woff2"
-          as="font"
-          type="font/woff2"
-          crossOrigin="anonymous"
-        />
-        
         <link rel="apple-touch-icon" href="/ios/180.png" />
         <link rel="apple-touch-icon" sizes="152x152" href="/ios/152.png" />
         <link rel="apple-touch-icon" sizes="180x180" href="/ios/180.png" />
@@ -124,7 +101,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
         <link rel="dns-prefetch" href="https://admin-al-asr.centers.pk" />
 
-        {/* ✅ Google Fonts for Urdu/Arabic support - Optimized */}
+        {/* ✅ Google Fonts - Optimized */}
         <link
           href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap"
           rel="stylesheet"
@@ -141,6 +118,36 @@ export default function RootLayout({ children }: RootLayoutProps) {
 
         {/* ✅ Prevent dark-mode filter */}
         <meta name="darkreader-lock" />
+
+        {/* ✅ Critical CSS Inline */}
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
+              /* Critical CSS for above-the-fold content */
+              body {
+                font-family: system-ui, -apple-system, sans-serif;
+                margin: 0;
+                padding: 0;
+                background: #ffffff;
+                color: #111827;
+              }
+              .min-h-screen {
+                min-height: 100vh;
+              }
+              .sr-only {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                padding: 0;
+                margin: -1px;
+                overflow: hidden;
+                clip: rect(0, 0, 0, 0);
+                white-space: nowrap;
+                border: 0;
+              }
+            `,
+          }}
+        />
       </head>
 
       <body className={`${inter.className} antialiased`}>
@@ -149,6 +156,28 @@ export default function RootLayout({ children }: RootLayoutProps) {
             {children}
           </main>
         </ThemeProvider>
+
+        {/* ✅ Font Loading Script */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // Load fonts after critical content
+              function loadFonts() {
+                const link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = 'https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap';
+                document.head.appendChild(link);
+              }
+              
+              // Load fonts when page is idle
+              if ('requestIdleCallback' in window) {
+                window.requestIdleCallback(loadFonts);
+              } else {
+                setTimeout(loadFonts, 500);
+              }
+            `,
+          }}
+        />
       </body>
     </html>
   );

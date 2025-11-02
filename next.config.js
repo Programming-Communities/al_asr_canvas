@@ -5,6 +5,7 @@ const nextConfig = {
   },
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
+    reactRemoveProperties: process.env.NODE_ENV === 'production',
   },
   images: {
     remotePatterns: [
@@ -31,8 +32,11 @@ const nextConfig = {
   },
   productionBrowserSourceMaps: false,
   
-  // ✅ ADD THIS FOR MODERN BROWSERS - REMOVE LEGACY POLYFILLS
+  // ✅ MODERN BROWSERS ONLY - NO POLYFILLS
   transpilePackages: [],
+  
+  // ✅ COMPRESSION
+  compress: true,
   
   async headers() {
     return [
@@ -50,6 +54,10 @@ const nextConfig = {
           {
             key: 'X-XSS-Protection',
             value: '1; mode=block'
+          },
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable'
           }
         ],
       },
@@ -57,4 +65,12 @@ const nextConfig = {
   },
 }
 
-module.exports = nextConfig
+// ✅ BUNDLE ANALYZER FOR PRODUCTION
+if (process.env.ANALYZE === 'true') {
+  const withBundleAnalyzer = require('@next/bundle-analyzer')({
+    enabled: true,
+  })
+  module.exports = withBundleAnalyzer(nextConfig)
+} else {
+  module.exports = nextConfig
+}

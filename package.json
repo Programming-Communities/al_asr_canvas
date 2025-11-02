@@ -3,13 +3,12 @@
   "version": "0.1.0",
   "private": true,
   
-  
   "browserslist": {
     "production": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version",
-      "last 1 edge version"
+      "last 2 chrome versions",
+      "last 2 firefox versions", 
+      "last 2 safari versions",
+      "last 2 edge versions"
     ],
     "development": [
       "last 1 chrome version",
@@ -24,11 +23,11 @@
     "start": "next start",
     "lint": "eslint",
     "analyze": "ANALYZE=true next build",
-    "build:prod": "NODE_ENV=production next build"
+    "build:prod": "NODE_ENV=production next build",
+    "export": "next export"
   },
   "dependencies": {
     "@apollo/client": "^4.0.9",
-    "@next/bundle-analyzer": "^16.0.1",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
     "clsx": "^2.1.1",
     "graphql": "^16.11.0",
@@ -41,6 +40,7 @@
     "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^16.0.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
