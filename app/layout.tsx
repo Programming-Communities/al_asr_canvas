@@ -1,11 +1,17 @@
+import { ApolloWrapper } from '@/lib/apollo-wrapper';
 import { ThemeProvider } from "@/components/shared/ThemeProvider";
 import "./globals.css";
 import { Metadata, Viewport } from "next";
 import { Inter } from 'next/font/google'
+import PerformanceMonitor from "@/components/PerformanceMonitor";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/react";
 
 const inter = Inter({ 
   subsets: ['latin'],
   display: 'swap',
+  variable: '--font-inter',
+  preload: true,
 })
 
 export const metadata: Metadata = {
@@ -43,7 +49,6 @@ export const metadata: Metadata = {
   },
   robots: { index: true, follow: true },
   alternates: { canonical: "https://al-asr.centers.pk" },
-  // ✅ PWA Metadata
   applicationName: "Al-Asr Islamic Service",
   authors: [{ name: "Al-Asr Islamic Service" }],
   generator: "Next.js",
@@ -60,8 +65,6 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
   themeColor: '#991b1b',
   colorScheme: 'light',
 }
@@ -104,11 +107,11 @@ export default function RootLayout({ children }: RootLayoutProps) {
         {/* ✅ PWA Manifest */}
         <link rel="manifest" href="/manifest.json" />
         
-        {/* ✅ Basic Meta */}
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+        {/* ✅ Fixed: Viewport meta */}
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/android/android-launchericon-48-48.png" />
 
-        {/* ✅ Preconnect + Prefetch */}
+        {/* ✅ Preconnect + Prefetch - Optimized */}
         <link
           rel="preconnect"
           href="https://fonts.googleapis.com"
@@ -123,10 +126,10 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
         <link rel="dns-prefetch" href="https://admin-al-asr.centers.pk" />
 
-        {/* ✅ Google Fonts - Optimized */}
+        {/* ✅ Google Fonts - Simplified */}
         <link
-          href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap"
           rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap"
         />
 
         {/* ✅ OG + Twitter Meta */}
@@ -141,85 +144,64 @@ export default function RootLayout({ children }: RootLayoutProps) {
         {/* ✅ Prevent dark-mode filter */}
         <meta name="darkreader-lock" />
 
-        {/* ✅ PWA Install Prompt */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              // PWA Install Prompt
-              let deferredPrompt;
-              window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                deferredPrompt = e;
-                
-                // Show install button
-                const installButton = document.getElementById('install-button');
-                if (installButton) {
-                  installButton.style.display = 'block';
-                  installButton.addEventListener('click', async () => {
-                    if (deferredPrompt) {
-                      deferredPrompt.prompt();
-                      const { outcome } = await deferredPrompt.userChoice;
-                      if (outcome === 'accepted') {
-                        deferredPrompt = null;
-                      }
-                    }
-                  });
-                }
-              });
-
-              // Detect device type for responsive PWA
-              function detectDeviceType() {
-                const userAgent = navigator.userAgent;
-                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
-                const isTablet = /iPad|Android/i.test(userAgent) && !/Mobile/i.test(userAgent);
-                
-                if (isMobile) {
-                  document.documentElement.classList.add('mobile-device');
-                } else if (isTablet) {
-                  document.documentElement.classList.add('tablet-device');
-                } else {
-                  document.documentElement.classList.add('desktop-device');
-                }
-              }
-              
-              // Load fonts after critical content
-              function loadFonts() {
-                const link = document.createElement('link');
-                link.rel = 'stylesheet';
-                link.href = 'https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap';
-                document.head.appendChild(link);
-              }
-              
-              // Initialize on load
-              window.addEventListener('load', () => {
-                detectDeviceType();
-                
-                // Load fonts when page is idle
-                if ('requestIdleCallback' in window) {
-                  window.requestIdleCallback(loadFonts);
-                } else {
-                  setTimeout(loadFonts, 500);
-                }
-              });
-            `,
-          }}
-        />
-
-        {/* ✅ Critical CSS Inline */}
+        {/* ✅ Critical CSS Inline - Optimized */}
         <style
           dangerouslySetInnerHTML={{
             __html: `
-              /* Critical CSS for above-the-fold content */
+              /*! Critical Above-the-Fold CSS */
+              :root {
+                --background: #ffffff;
+                --foreground: #171717;
+                --header-bg: #991b1b;
+                --header-text: #ffffff;
+              }
+              
+              [data-theme="dark"] {
+                --background: #1a1a1a;
+                --foreground: #f5f5f5;
+                --header-bg: #2d2d2d;
+                --header-text: #f5f5f5;
+              }
+              
+              * {
+                box-sizing: border-box;
+              }
+              
+              html {
+                scroll-behavior: smooth;
+              }
+              
               body {
-                font-family: system-ui, -apple-system, sans-serif;
+                font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
                 margin: 0;
                 padding: 0;
-                background: #ffffff;
-                color: #111827;
+                background: var(--background);
+                color: var(--foreground);
+                line-height: 1.6;
+                overflow-x: hidden;
+                min-height: 100vh;
+                opacity: 1 !important;
               }
-              .min-h-screen {
+              
+              /* Fix for Next.js Image fill positioning */
+              .next-image-container {
+                position: relative !important;
+                width: 100%;
+                height: 100%;
+              }
+              
+              /* Header Critical Styles */
+              .header-critical {
+                background: var(--header-bg) !important;
+                color: var(--header-text) !important;
+              }
+              
+              /* Main Content Area */
+              #main-content {
                 min-height: 100vh;
               }
+              
+              /* Accessibility */
               .sr-only {
                 position: absolute;
                 width: 1px;
@@ -232,18 +214,15 @@ export default function RootLayout({ children }: RootLayoutProps) {
                 border: 0;
               }
               
-              /* PWA Responsive Classes */
-              .mobile-device .desktop-only {
-                display: none !important;
-              }
-              .desktop-device .mobile-only {
-                display: none !important;
-              }
-              .tablet-device .mobile-only {
-                display: none !important;
+              /* Focus styles for accessibility */
+              button:focus-visible,
+              a:focus-visible {
+                outline: 2px solid #3b82f6;
+                outline-offset: 2px;
+                border-radius: 2px;
               }
               
-              /* Install Button */
+              /* PWA Install Button */
               #install-button {
                 display: none;
                 position: fixed;
@@ -257,6 +236,33 @@ export default function RootLayout({ children }: RootLayoutProps) {
                 border-radius: 8px;
                 cursor: pointer;
                 font-size: 14px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+              }
+              
+              #install-button:hover {
+                background: #7f1d1d;
+                transform: translateY(-1px);
+              }
+              
+              /* Loading states */
+              .skeleton {
+                background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+                background-size: 200% 100%;
+                animation: loading 1.5s infinite;
+              }
+              
+              @keyframes loading {
+                0% { background-position: 200% 0; }
+                100% { background-position: -200% 0; }
+              }
+              
+              /* Reduced motion support */
+              @media (prefers-reduced-motion: reduce) {
+                * {
+                  animation-duration: 0.01ms !important;
+                  animation-iteration-count: 1 !important;
+                  transition-duration: 0.01ms !important;
+                }
               }
             `,
           }}
@@ -264,16 +270,81 @@ export default function RootLayout({ children }: RootLayoutProps) {
       </head>
 
       <body className={`${inter.className} antialiased`}>
-        {/* PWA Install Button */}
-        <button id="install-button" className="hidden md:flex">
-          📱 Install App
+        {/* ✅ Performance Monitoring */}
+        <PerformanceMonitor />
+        
+        {/* ✅ PWA Install Button */}
+        <button id="install-button" className="hidden md:flex items-center gap-2">
+          <span>📱</span>
+          Install App
         </button>
 
-        <ThemeProvider>
-          <main role="main" id="main-content" tabIndex={-1}>
-            {children}
-          </main>
-        </ThemeProvider>
+        {/* ✅ Apollo Wrapper - Theme Provider ke bahar */}
+        <ApolloWrapper>
+          <ThemeProvider>
+            <main role="main" id="main-content" tabIndex={-1} className="min-h-screen">
+              {children}
+            </main>
+          </ThemeProvider>
+        </ApolloWrapper>
+
+        {/* ✅ Analytics */}
+        <SpeedInsights />
+        <Analytics />
+
+        {/* ✅ PWA Script - Deferred */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // PWA Install Prompt - Deferred
+              let deferredPrompt;
+              window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                
+                // Show install button after 3 seconds
+                setTimeout(() => {
+                  const installButton = document.getElementById('install-button');
+                  if (installButton && deferredPrompt) {
+                    installButton.style.display = 'flex';
+                    
+                    installButton.addEventListener('click', async () => {
+                      if (deferredPrompt) {
+                        deferredPrompt.prompt();
+                        const { outcome } = await deferredPrompt.userChoice;
+                        if (outcome === 'accepted') {
+                          installButton.style.display = 'none';
+                          deferredPrompt = null;
+                        }
+                      }
+                    });
+                    
+                    // Auto-hide after 10 seconds
+                    setTimeout(() => {
+                      if (installButton.style.display !== 'none') {
+                        installButton.style.display = 'none';
+                      }
+                    }, 10000);
+                  }
+                }, 3000);
+              });
+
+              // Service Worker Registration for PWA
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                  navigator.serviceWorker.register('/sw.js').then(
+                    (registration) => {
+                      console.log('SW registered: ', registration);
+                    },
+                    (registrationError) => {
+                      console.log('SW registration failed: ', registrationError);
+                    }
+                  );
+                });
+              }
+            `,
+          }}
+        />
       </body>
     </html>
   );

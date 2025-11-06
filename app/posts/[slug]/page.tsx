@@ -1,19 +1,15 @@
-// app/posts/[slug]/page.tsx
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { PostPageSkeleton } from '@/components/skeleton/PostPageSkeleton';
 import PostClient from './PostClient';
 import { getPost } from '@/lib/wordpress';
 
-// Enhanced RTL detection function
 function isRTLText(text: string): boolean {
   if (!text) return false;
-  // Arabic, Urdu, Persian, Hebrew characters
   const rtlRegex = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\u0590-\u05FF\uFB50-\uFDFF\uFE70-\uFEFF\u0700-\u074F]/;
   return rtlRegex.test(text);
 }
 
-// PostContent component
 async function PostContent({ slug }: { slug: string }) {
   const post = await getPost(slug);
   
@@ -21,7 +17,6 @@ async function PostContent({ slug }: { slug: string }) {
     notFound();
   }
 
-  // Enhanced RTL language detection
   const isTitleRTL = isRTLText(post.title);
   const isContentRTL = isRTLText(post.content);
   const isUrdu = isTitleRTL || isContentRTL;
@@ -29,7 +24,6 @@ async function PostContent({ slug }: { slug: string }) {
   return <PostClient post={post} slug={slug} isUrdu={isUrdu} />;
 }
 
-// Main page component
 export default async function PostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
 
@@ -40,7 +34,6 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
   );
 }
 
-// Generate metadata for SEO
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const post = await getPost(slug);
@@ -85,7 +78,6 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
 }
 
-// Generate static params for SSG
 export async function generateStaticParams() {
   return [
     { slug: '27-october-2025' },

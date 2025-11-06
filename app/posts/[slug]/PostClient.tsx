@@ -3,54 +3,150 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Header from '@/components/layout/Header';
 import { Post } from '@/types/blog';
-import ReadingControls from '@/components/shared/ReadingControls'; // ✅ ADD THIS
-import { useState, useEffect } from 'react'; // ✅ ADD THIS
+import ReadingControls from '@/components/shared/ReadingControls';
+import { useState, useEffect } from 'react';
 
-// Social Sharing Component
 function PostSocialShareButtons({ title, slug, isRTL }: { 
   title: string; 
   slug: string; 
   isRTL: boolean; 
 }) {
-  const shareOnWhatsApp = () => {
-    const url = `${window.location.origin}/posts/${slug}`;
-    const text = `📖 ${title}\n\nRead this amazing post from Al-Asr ( Islamic Service ):\n${url}`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  const [copied, setCopied] = useState(false);
+
+  const getShareUrl = () => {
+    if (typeof window !== 'undefined') {
+      return `${window.location.origin}/posts/${slug}`;
+    }
+    return `/posts/${slug}`;
   };
 
-  const shareOnFacebook = () => {
-    const url = `${window.location.origin}/posts/${slug}`;
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+  const shareOnPlatform = (platform: string) => {
+    const shareUrl = getShareUrl();
+    const shareText = `${title} - Al Asr Islamic Service`;
+    
+    const platforms: { [key: string]: string } = {
+      whatsapp: `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`,
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
+      twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
+      linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`,
+      telegram: `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`,
+      reddit: `https://reddit.com/submit?url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent(shareText)}`
+    };
+
+    const windowFeatures = 'width=600,height=400,menubar=no,toolbar=no,location=no';
+    const newWindow = window.open(platforms[platform], '_blank', windowFeatures);
+    
+    if (newWindow) {
+      newWindow.opener = null;
+    }
   };
+
+  const copyToClipboard = async () => {
+    const shareUrl = getShareUrl();
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      const textArea = document.createElement('textarea');
+      textArea.value = shareUrl;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const socialButtons = [
+    {
+      key: 'whatsapp',
+      label: 'WhatsApp',
+      color: 'bg-green-600 hover:bg-green-700',
+      icon: '📱'
+    },
+    {
+      key: 'facebook',
+      label: 'Facebook',
+      color: 'bg-blue-600 hover:bg-blue-700',
+      icon: '🔵'
+    },
+    {
+      key: 'twitter',
+      label: 'Twitter',
+      color: 'bg-sky-500 hover:bg-sky-600',
+      icon: '🐦'
+    },
+    {
+      key: 'linkedin',
+      label: 'LinkedIn',
+      color: 'bg-blue-700 hover:bg-blue-800',
+      icon: '💼'
+    },
+    {
+      key: 'telegram',
+      label: 'Telegram',
+      color: 'bg-blue-400 hover:bg-blue-500',
+      icon: '✈️'
+    },
+    {
+      key: 'reddit',
+      label: 'Reddit',
+      color: 'bg-orange-600 hover:bg-orange-700',
+      icon: '🔺'
+    }
+  ];
 
   return (
-    <div className={`flex flex-wrap gap-3 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 ${isRTL ? 'flex-row-reverse justify-end' : ''}`}>
-      <span className={`text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'ml-2' : 'mr-2'}`}>
-        Share this post:
-      </span>
-    
-      <button
-        onClick={shareOnWhatsApp}
-        className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm min-h-10"
-        title="Share on WhatsApp"
-      >
-        <span>📱</span>
-        WhatsApp
-      </button>
-    
-      <button
-        onClick={shareOnFacebook}
-        className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm min-h-10"
-        title="Share on Facebook"
-      >
-        <span>🔵</span>
-        Facebook
-      </button>
+    <div className={`mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 ${isRTL ? 'text-right' : 'text-left'}`}>
+      <div className="mb-4">
+        <span className={`text-sm font-semibold text-gray-700 dark:text-gray-300 ${isRTL ? 'ml-2' : 'mr-2'}`}>
+          Share this post:
+        </span>
+      </div>
+      
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 max-w-2xl">
+        {socialButtons.map((button) => (
+          <button
+            key={button.key}
+            onClick={() => shareOnPlatform(button.key)}
+            className={`flex flex-col items-center justify-center p-3 ${button.color} text-white rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95 min-h-20`}
+            title={`Share on ${button.label}`}
+            aria-label={`Share on ${button.label}`}
+          >
+            <span className="text-xl mb-1">{button.icon}</span>
+            <span className="text-xs font-medium">{button.label}</span>
+          </button>
+        ))}
+        
+        <button
+          onClick={copyToClipboard}
+          className={`flex flex-col items-center justify-center p-3 rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95 min-h-20 ${
+            copied 
+              ? 'bg-green-600 text-white' 
+              : 'bg-gray-600 hover:bg-gray-700 text-white'
+          }`}
+          title={copied ? "Copied!" : "Copy link"}
+          aria-label={copied ? "Link copied" : "Copy link to clipboard"}
+        >
+          {copied ? (
+            <>
+              <span className="text-xl mb-1">✅</span>
+              <span className="text-xs font-medium">Copied!</span>
+            </>
+          ) : (
+            <>
+              <span className="text-xl mb-1">📋</span>
+              <span className="text-xs font-medium">Copy Link</span>
+            </>
+          )}
+        </button>
+      </div>
     </div>
   );
 }
 
-// Post Meta Information Component
 function PostMetaInfo({ post, isRTL }: { 
   post: Post; 
   isRTL: boolean; 
@@ -61,6 +157,8 @@ function PostMetaInfo({ post, isRTL }: {
     const minutes = Math.ceil(words / 200);
     return `${minutes} min read`;
   };
+
+  const categories = post.categories?.nodes || [];
 
   return (
     <div className={`bg-gray-50 dark:bg-gray-800 p-6 rounded-lg mb-6 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? "rtl" : "ltr"}>
@@ -83,12 +181,12 @@ function PostMetaInfo({ post, isRTL }: {
         </div>
       </div>
     
-      {post.categories.nodes.length > 0 && (
+      {categories.length > 0 && (
         <div className={`mt-4 ${isRTL ? 'text-right' : 'text-left'}`}>
           <span className={`text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'ml-2' : 'mr-2'}`}>
             Categories:
           </span>
-          {post.categories.nodes.map((category, index) => (
+          {categories.map((category, index) => (
             <span
               key={category.slug}
               className={`inline-block bg-red-900 dark:bg-red-800 text-white text-xs px-3 py-1 rounded-full ${isRTL ? 'ml-2' : 'mr-2'} mb-2 min-h-6 flex items-center`}
@@ -102,7 +200,6 @@ function PostMetaInfo({ post, isRTL }: {
   );
 }
 
-// Main Post Client Component
 interface PostClientProps {
   post: Post;
   slug: string;
@@ -114,11 +211,9 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
   const isContentRTL = isUrdu;
   const currentIsRTL = isTitleRTL || isContentRTL;
 
-  // ✅ ADD THESE STATE VARIABLES FOR READING CONTROLS
   const [fontSize, setFontSize] = useState(100);
   const [readingTheme, setReadingTheme] = useState<'light' | 'dark'>('light');
 
-  // ✅ APPLY FONT SIZE TO CONTENT
   useEffect(() => {
     const contentElement = document.getElementById('blog-content');
     if (contentElement) {
@@ -127,7 +222,6 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
     }
   }, [fontSize]);
 
-  // ✅ APPLY READING THEME
   useEffect(() => {
     const root = document.documentElement;
     if (readingTheme === 'dark') {
@@ -150,7 +244,6 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
           className="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden"
           dir={currentIsRTL ? "rtl" : "ltr"}
         >
-          {/* Featured Image */}
           {post.featuredImage?.node?.sourceUrl && (
             <div className="w-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
               <div className="relative w-full h-[500px] mx-auto">
@@ -167,7 +260,6 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
           )}
 
           <div className="p-6 md:p-8">
-            {/* Title */}
             <h1
               className={`text-3xl md:text-4xl font-bold mb-6 leading-tight ${
                 currentIsRTL ? 'text-right' : 'text-left'
@@ -181,12 +273,10 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
               {post.title}
             </h1>
 
-            {/* Meta Information */}
             <PostMetaInfo post={post} isRTL={currentIsRTL} />
 
-            {/* Main Content */}
             <div
-              id="blog-content" // ✅ ADD THIS ID
+              id="blog-content"
               className={`wp-content max-w-none transition-all duration-300 ${
                 currentIsRTL ? 'urdu-arabic-content' : 'english-content'
               } ${readingTheme === 'dark' ? 'text-gray-300' : 'text-gray-700 dark:text-gray-300'}`}
@@ -199,12 +289,8 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
               dangerouslySetInnerHTML={{ __html: post.content }}
             />
 
-            {/* Social Sharing */}
-            <div className="mt-8">
-              <PostSocialShareButtons title={post.title} slug={slug} isRTL={currentIsRTL} />
-            </div>
+            <PostSocialShareButtons title={post.title} slug={slug} isRTL={currentIsRTL} />
 
-            {/* Back to Posts */}
             <div className={`mt-8 pt-6 border-t border-gray-200 dark:border-gray-700 ${currentIsRTL ? 'text-right' : 'text-left'}`}>
               <Link
                 href="/"
@@ -227,13 +313,11 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
         </article>
       </div>
 
-      {/* ✅ ADD READING CONTROLS */}
       <ReadingControls 
         onFontSizeChange={setFontSize}
         onThemeChange={setReadingTheme}
       />
 
-      {/* Global Styles for Content */}
       <style jsx global>{`
         .wp-content {
           color: inherit;
@@ -261,7 +345,6 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
         .wp-content h5 { font-size: 1.25rem; }
         .wp-content h6 { font-size: 1.125rem; }
 
-        /* Urdu/Arabic Content Styling */
         .urdu-arabic-content {
           font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', 'Scheherazade New', serif;
           text-align: right;
@@ -284,7 +367,6 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
         .urdu-arabic-content h5 { font-size: 1.4rem; }
         .urdu-arabic-content h6 { font-size: 1.2rem; }
 
-        /* English Content Styling */
         .english-content {
           font-family: system-ui, -apple-system, sans-serif;
           text-align: left;
@@ -300,7 +382,6 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
           text-align: left;
         }
 
-        /* Reading Dark Mode */
         .reading-dark {
           --tw-bg-opacity: 1;
           background-color: rgb(17 24 39 / var(--tw-bg-opacity)) !important;
@@ -319,7 +400,6 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
           color: rgb(249 250 251) !important;
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
           .wp-content h1 { font-size: 2rem; }
           .wp-content h2 { font-size: 1.75rem; }
