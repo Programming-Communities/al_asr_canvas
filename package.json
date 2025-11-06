@@ -21,10 +21,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
+    "lint": "next lint",
     "analyze": "ANALYZE=true next build",
-    "build:prod": "NODE_ENV=production next build",
-    "export": "next export"
+    "build:prod": "NODE_ENV=production next build"
   },
   "dependencies": {
     "@apollo/client": "^4.0.9",

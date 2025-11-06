@@ -1,43 +1,30 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Turbopack disable karein production mein
   experimental: {
-    optimizeCss: true,
+    optimizeCss: false, // CSS optimization disable
   },
+  
+  // Compiler options
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
-    reactRemoveProperties: process.env.NODE_ENV === 'production',
   },
+  
+  // Images configuration
   images: {
     remotePatterns: [
       {
         protocol: 'https',
         hostname: 'admin-al-asr.centers.pk',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'al-asr.centers.pk',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: '**.centers.pk',
-        pathname: '/**',
       },
     ],
+    formats: ['image/webp', 'image/avif'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    formats: ['image/webp', 'image/avif'],
-    minimumCacheTTL: 31536000,
+    minimumCacheTTL: 60,
   },
-  productionBrowserSourceMaps: false,
   
-  // ✅ MODERN BROWSERS ONLY - NO POLYFILLS
-  transpilePackages: [],
-  
-  // ✅ COMPRESSION
-  compress: true,
-  
+  // Security headers
   async headers() {
     return [
       {
@@ -54,23 +41,14 @@ const nextConfig = {
           {
             key: 'X-XSS-Protection',
             value: '1; mode=block'
-          },
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable'
           }
         ],
-      },
-    ]
+      }
+    ];
   },
+  
+  poweredByHeader: false,
+  compress: true,
 }
 
-// ✅ BUNDLE ANALYZER FOR PRODUCTION
-if (process.env.ANALYZE === 'true') {
-  const withBundleAnalyzer = require('@next/bundle-analyzer')({
-    enabled: true,
-  })
-  module.exports = withBundleAnalyzer(nextConfig)
-} else {
-  module.exports = nextConfig
-}
+module.exports = nextConfig
