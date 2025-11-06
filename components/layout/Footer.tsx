@@ -38,13 +38,13 @@ const Footer: React.FC = () => {
   const socialLinks = [
     {
       icon: Facebook,
-      href: "#",
+      href: "https://www.facebook.com/shiaquranteachers",
       label: "Facebook",
       color: "hover:bg-blue-600",
     },
     {
       icon: Instagram,
-      href: "#",
+      href: "https://www.instagram.com/shiaquranteachers/",
       label: "Instagram",
       color: "hover:bg-pink-600",
     },
@@ -62,7 +62,7 @@ const Footer: React.FC = () => {
     },
     {
       icon: Mail,
-      href: "mailto:info@al-asr.com",
+      href: "mailto:info@al-asr.centers.pk",
       label: "Email",
       color: "hover:bg-green-600",
     },
@@ -110,11 +110,15 @@ const Footer: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-3 text-gray-300">
                   <Phone className="w-4 h-4 text-red-400" />
-                  <span className="text-sm">+92 300 1234567</span>
+                  <span className="text-sm">0300-8055414</span>
+                </div>
+                <div className="flex items-center gap-3 text-gray-300">
+                  <Phone className="w-4 h-4 text-red-400" />
+                  <span className="text-sm">0313-8055414</span>
                 </div>
                 <div className="flex items-center gap-3 text-gray-300">
                   <Mail className="w-4 h-4 text-red-400" />
-                  <span className="text-sm">info@al-asr.org</span>
+                  <span className="text-sm">info@al-asr.centers.pk</span>
                 </div>
               </div>
             </div>
@@ -197,6 +201,8 @@ const Footer: React.FC = () => {
                       <a
                         key={social.label}
                         href={social.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className={`p-2 bg-gray-800 rounded-lg text-gray-300 hover:text-white transition-all duration-200 ${social.color} transform hover:scale-110`}
                         aria-label={social.label}
                         title={social.label}
@@ -230,42 +236,43 @@ const Footer: React.FC = () => {
         {/* Bottom Bar */}
         <div className="border-t border-gray-800">
           <div className="container mx-auto px-4 py-6">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              {/* Copyright */}
-              <div className="flex items-center gap-2 text-gray-400 text-sm">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
+              {/* Copyright - Mobile Optimized */}
+              <div className="flex flex-col sm:flex-row items-center gap-2 text-gray-400 text-sm">
                 <span>© {currentYear} Al-Asr Islamic Service Center.</span>
-                <span className="flex items-center gap-1">
+                <span className="hidden sm:inline">•</span>
+                <span className="flex items-center justify-center gap-1 flex-wrap">
                   Made with{" "}
-                  <Heart className="w-4 h-4 text-red-400 fill-current" /> for
-                  the community by{" "}
+                  <Heart className="w-4 h-4 text-red-400 fill-current mx-1" />{" "}
+                  for the community by{" "}
                   <a
                     href="https://programming.communities.pk"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-red-400 hover:text-red-300 underline transition-colors duration-200 font-medium"
+                    className="text-red-400 hover:text-red-300 underline transition-colors duration-200 font-medium ml-1"
                   >
                     Programming Communities
                   </a>
                 </span>
               </div>
 
-              {/* Legal Links */}
-              <div className="flex gap-6 text-sm">
+              {/* Legal Links - Mobile Optimized */}
+              <div className="flex flex-wrap justify-center gap-4 md:gap-6 text-sm">
                 <a
                   href="/privacy-policy"
-                  className="text-gray-400 hover:text-red-400 transition-colors"
+                  className="text-gray-400 hover:text-red-400 transition-colors whitespace-nowrap"
                 >
                   Privacy Policy
                 </a>
                 <a
                   href="/terms-of-service"
-                  className="text-gray-400 hover:text-red-400 transition-colors"
+                  className="text-gray-400 hover:text-red-400 transition-colors whitespace-nowrap"
                 >
                   Terms of Service
                 </a>
                 <a
                   href="/sitemap.xml"
-                  className="text-gray-400 hover:text-red-400 transition-colors"
+                  className="text-gray-400 hover:text-red-400 transition-colors whitespace-nowrap"
                 >
                   Sitemap
                 </a>

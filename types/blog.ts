@@ -32,4 +32,5 @@ export interface Post {
 export interface BlogListProps {
   showTitle?: boolean;
   currentPostSlug?: string | null;
+  initialPosts?: Post[]; // Added for SSR hydration
 }

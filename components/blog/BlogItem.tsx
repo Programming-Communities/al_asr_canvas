@@ -1,22 +1,25 @@
 'use client';
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import Link from 'next/link';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import SocialShareButtons from '../shared/SocialShareButtons';
 import { Post } from '@/types/blog';
 import { 
   Calendar, 
   Clock, 
-  ArrowRight, 
   Image as ImageIcon,
   Share2,
-  Eye
+  Eye,
+  X,
+  BookOpen,
+  Sparkles
 } from 'lucide-react';
 
 interface BlogItemProps extends Post {
   index?: number;
   readingTime?: number;
   views?: number;
+  priority?: boolean;
 }
 
 const BlogItem: React.FC<BlogItemProps> = ({
@@ -28,205 +31,325 @@ const BlogItem: React.FC<BlogItemProps> = ({
   slug,
   index = 0,
   readingTime = 3,
-  views = 0
+  views = 0,
+  priority = false
 }) => {
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const [showSocialMenu, setShowSocialMenu] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const socialMenuRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
-  // Memoized clean excerpt
+  // Memoized values for performance - Optimized
+  const postUrl = useMemo(() => 
+    `${window?.location?.origin || ''}/posts/${slug}`,
+    [slug]
+  );
+
   const cleanExcerpt = useMemo(() => {
-    return excerpt
-      ? excerpt.replace(/<[^>]*>/g, '').substring(0, 120) + '...'
-      : 'Discover insights and valuable information in this post...';
+    if (!excerpt) return 'Discover insights and valuable information in this post...';
+    
+    const text = excerpt.replace(/<[^>]*>/g, '').trim();
+    return text.length > 120 ? `${text.substring(0, 120)}...` : text;
   }, [excerpt]);
 
-  // Memoized category
   const category = useMemo(() => {
-    return categories?.nodes?.[0]?.name || 'Islamic Insights';
+    const categoryName = categories?.nodes?.[0]?.name || 'Islamic Insights';
+    return categoryName.length > 15 ? `${categoryName.substring(0, 15)}...` : categoryName;
   }, [categories]);
 
-  // Memoized formatted date
   const formattedDate = useMemo(() => {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
+    try {
+      return new Date(date).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    } catch {
+      return 'Invalid date';
+    }
   }, [date]);
 
-  // Performance optimization
-  const isLCPCandidate = index < 3;
+  const animationDelay = useMemo(() => 
+    `${(index % 6) * 100}ms`,
+    [index]
+  );
 
-  // Optimized image URL handler
-  const getOptimizedImageUrl = useCallback((url: string) => {
-    if (!url) return '';
-    // Add image optimization parameters if needed
-    return url;
+  const isLCPCandidate = index < 3 || priority;
+
+  // Optimized navigation handler
+  const handleNavigation = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (isNavigating) return;
+    
+    setIsNavigating(true);
+    
+    // Use requestAnimationFrame for better performance
+    requestAnimationFrame(() => {
+      router.push(`/posts/${slug}`);
+    });
+  }, [router, slug, isNavigating]);
+
+  const handleShareClick = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowSocialMenu(prev => !prev);
   }, []);
 
-  // Close social menu when clicking outside
+  const closeSocialMenu = useCallback(() => {
+    setShowSocialMenu(false);
+  }, []);
+
+  const handleCardClick = useCallback((e: React.MouseEvent) => {
+    if (showSocialMenu) {
+      e.preventDefault();
+      e.stopPropagation();
+      setShowSocialMenu(false);
+    }
+  }, [showSocialMenu]);
+
+  // Optimized Intersection Observer
   useEffect(() => {
+    if (!cardRef.current) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(cardRef.current);
+
+    return () => {
+      if (cardRef.current) {
+        observer.unobserve(cardRef.current);
+      }
+    };
+  }, []);
+
+  // Optimized click outside handler
+  useEffect(() => {
+    if (!showSocialMenu) return;
+
     const handleClickOutside = (event: MouseEvent) => {
-      if (showSocialMenu) {
+      if (socialMenuRef.current && !socialMenuRef.current.contains(event.target as Node)) {
         setShowSocialMenu(false);
       }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, [showSocialMenu]);
 
-  // Animation delay based on index
-  const animationDelay = useMemo(() => {
-    return `${(index % 6) * 100}ms`;
-  }, [index]);
+  // Reset navigation state
+  useEffect(() => {
+    if (isNavigating) {
+      const timer = setTimeout(() => {
+        setIsNavigating(false);
+      }, 2000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isNavigating]);
+
+  // Optimized image handlers
+  const handleImageError = useCallback(() => {
+    setImageError(true);
+    setImageLoading(false);
+  }, []);
+
+  const handleImageLoad = useCallback(() => {
+    setImageLoading(false);
+  }, []);
+
+  // Optimized blur data URL for faster loading
+  const blurDataURL = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q==";
 
   return (
     <article 
-      className="group relative max-w-[360px] bg-white dark:bg-gray-900 border-2 border-red-900/20 dark:border-red-800/30 rounded-xl hover:border-red-900/40 dark:hover:border-red-800/60 hover:shadow-[-8px_8px_0px_#991b1b] dark:hover:shadow-[-8px_8px_0px_#7f1d1d] transition-all duration-500 ease-out cursor-pointer mx-auto overflow-hidden"
-      style={{ animationDelay }}
+      ref={cardRef}
+      className={`group relative w-full bg-white/80 dark:bg-gray-900/80 border-2 border-red-900/20 dark:border-red-800/30 rounded-xl hover:border-red-900/40 dark:hover:border-red-800/60 hover:shadow-[-4px_4px_0px_#991b1b] dark:hover:shadow-[-4px_4px_0px_#7f1d1d] backdrop-blur-sm transition-all duration-300 ease-out cursor-pointer mx-auto overflow-hidden will-change-transform ${
+        isNavigating ? 'opacity-70 pointer-events-none' : ''
+      }`}
+      style={{ 
+        animationDelay,
+        transform: isVisible 
+          ? (isHovered ? 'translateY(-2px) scale(1.01)' : 'translateY(0) scale(1)') 
+          : 'translateY(10px)',
+        opacity: isVisible ? 1 : 0,
+      }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onClick={handleCardClick}
     >
-      {/* Image Container with Overlay */}
-      <div className="relative h-52 w-full bg-red-50 dark:bg-gray-800 overflow-hidden">
-        <Link href={`/posts/${slug}`} className="block h-full">
+      {/* Navigation Loading Indicator */}
+      {isNavigating && (
+        <div className="absolute inset-0 bg-white/80 dark:bg-gray-900/80 z-50 flex items-center justify-center rounded-xl">
+          <div className="flex flex-col items-center gap-2">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-red-600"></div>
+            <span className="text-xs text-gray-600 dark:text-gray-300">Loading...</span>
+          </div>
+        </div>
+      )}
+
+      {/* Image Container - Optimized */}
+      <div className="relative h-48 w-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
+        <div 
+          className="block h-full w-full focus:outline-none cursor-pointer"
+          onClick={handleNavigation}
+          aria-label={`Read article: ${title}`}
+        >
           {featuredImage?.node?.sourceUrl && !imageError ? (
             <>
               <Image
-                src={getOptimizedImageUrl(featuredImage.node.sourceUrl)}
+                src={featuredImage.node.sourceUrl}
                 alt={featuredImage.node.altText || title}
-                fill
-                className={`object-cover transition-all duration-700 ${
-                  isHovered ? 'scale-110 rotate-1' : 'scale-100'
-                }`}
-                onError={() => setImageError(true)}
-                onLoad={() => setImageLoading(false)}
+                width={400}
+                height={240}
+                className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                onError={handleImageError}
+                onLoad={handleImageLoad}
                 loading={isLCPCandidate ? "eager" : "lazy"}
                 priority={isLCPCandidate}
-                fetchPriority={isLCPCandidate ? "high" : "auto"} // ✅ LCP OPTIMIZATION
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                quality={75} // ✅ REDUCED FROM 85 FOR BETTER PERFORMANCE
+                sizes="(max-width: 640px) 90vw, (max-width: 768px) 45vw, (max-width: 1024px) 30vw, 25vw"
+                quality={70}
                 placeholder="blur"
-                blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
+                blurDataURL={blurDataURL}
               />
               
-              {/* Loading Skeleton */}
+              {/* Loading State - Simplified */}
               {imageLoading && (
-                <div className="absolute inset-0 bg-gray-200 dark:bg-gray-700 animate-pulse z-10 flex items-center justify-center">
-                  <div className="flex flex-col items-center gap-2">
-                    <ImageIcon className="w-6 h-6 text-gray-400 dark:text-gray-500" />
-                    <span className="text-gray-500 dark:text-gray-400 text-sm">Loading...</span>
-                  </div>
-                </div>
+                <div className="absolute inset-0 bg-gray-200 dark:bg-gray-700 animate-pulse z-10" />
               )}
 
-              {/* Hover Overlay */}
-              <div className={`absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4`}>
-                <span className="text-white text-sm font-medium bg-red-900/80 px-3 py-1 rounded-full backdrop-blur-sm">
+              {/* Read Article Overlay - Optimized */}
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                <span className="text-white text-xs font-semibold bg-red-600/90 px-3 py-2 rounded-lg backdrop-blur-sm flex items-center gap-2">
+                  <Sparkles className="w-3 h-3" />
                   Read Article
                 </span>
               </div>
             </>
           ) : (
-            // Fallback Image State
-            <div className="flex items-center justify-center h-full bg-red-50 dark:bg-gray-800">
-              <div className="text-center p-6">
-                <ImageIcon className="w-12 h-12 text-red-300 dark:text-gray-600 mx-auto mb-3" />
-                <p className="text-red-400 dark:text-gray-400 text-sm font-medium">
-                  {imageError ? 'Image Loading Failed' : 'Featured Image'}
+            // Fallback State - Optimized
+            <div 
+              className="flex flex-col items-center justify-center h-full w-full bg-gray-100 dark:bg-gray-800 p-4 text-center cursor-pointer"
+              onClick={handleNavigation}
+            >
+              <div className="flex flex-col items-center gap-2">
+                <ImageIcon className="w-8 h-8 text-gray-400 dark:text-gray-600" />
+                <p className="text-gray-500 dark:text-gray-400 text-xs">
+                  {imageError ? 'Image unavailable' : 'Featured Image'}
                 </p>
               </div>
             </div>
           )}
-        </Link>
-
-        {/* Category Badge */}
-        <div className="absolute top-3 left-3 z-20">
-          <span className="inline-flex items-center bg-red-900 dark:bg-red-800 text-white text-xs px-3 py-1.5 rounded-full font-semibold backdrop-blur-sm shadow-lg">
-            {category}
-          </span>
         </div>
       </div>
 
-      {/* Content Section */}
-      <div className="p-6">
-        {/* Meta Information */}
-        <div className="flex items-center gap-4 mb-4 text-xs text-gray-500 dark:text-gray-400">
+      {/* Content Section - Optimized */}
+      <div className="p-4 bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm">
+        {/* Meta Information - Optimized */}
+        <div className="flex items-center gap-2 mb-2 text-xs text-gray-500 dark:text-gray-400 flex-wrap">
           <div className="flex items-center gap-1">
             <Calendar className="w-3 h-3" />
-            <span>{formattedDate}</span>
+            <time dateTime={date}>{formattedDate}</time>
           </div>
+          <span className="text-gray-300">•</span>
           <div className="flex items-center gap-1">
             <Clock className="w-3 h-3" />
-            <span>{readingTime} min read</span>
+            <span>{readingTime} min</span>
           </div>
           {views > 0 && (
-            <div className="flex items-center gap-1">
-              <Eye className="w-3 h-3" />
-              <span>{views} views</span>
-            </div>
+            <>
+              <span className="text-gray-300">•</span>
+              <div className="flex items-center gap-1">
+                <Eye className="w-3 h-3" />
+                <span>{views > 1000 ? `${(views/1000).toFixed(1)}k` : views}</span>
+              </div>
+            </>
           )}
         </div>
 
-        {/* Title */}
-        <Link href={`/posts/${slug}`}>
-          <h3 className="mb-3 text-xl font-bold text-gray-900 dark:text-white line-clamp-2 min-h-14 leading-tight group-hover:text-red-700 dark:group-hover:text-red-400 transition-colors duration-300">
+        {/* Title - Optimized */}
+        <div 
+          className="mb-2 cursor-pointer"
+          onClick={handleNavigation}
+        >
+          <h3 className="text-base font-bold text-gray-900 dark:text-white line-clamp-2 leading-tight hover:text-red-700 dark:hover:text-red-400 transition-colors duration-200 min-h-10">
             {title}
           </h3>
-        </Link>
+        </div>
 
-        {/* Excerpt */}
-        <p className="mb-6 text-sm text-gray-600 dark:text-gray-300 line-clamp-3 min-h-[60px] leading-relaxed">
+        {/* Excerpt - Optimized */}
+        <p className="text-xs text-gray-600 dark:text-gray-300 line-clamp-2 leading-relaxed mb-3 min-h-10">
           {cleanExcerpt}
         </p>
 
-        {/* Footer Actions */}
-        <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
-          {/* Read More Link */}
-          <Link
-            href={`/posts/${slug}`}
-            className="group/link inline-flex items-center font-semibold text-red-900 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-all duration-300 text-sm"
-          >
-            Continue Reading
-            <ArrowRight className="ml-2 w-4 h-4 transform group-hover/link:translate-x-1 transition-transform" />
-          </Link>
+        {/* Bottom Actions Bar - Optimized */}
+        <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-700">
+          {/* Categories - Optimized */}
+          <div className="flex items-center max-w-[70%]">
+            <span className="text-xs text-red-700 dark:text-red-400 font-semibold bg-red-50 dark:bg-red-900/20 px-2 py-1 rounded-md border border-red-200 dark:border-red-800 truncate">
+              {category}
+            </span>
+          </div>
 
-          {/* Share Button */}
-          <div className="relative">
+          {/* Share Button - Optimized */}
+          <div className="relative" ref={socialMenuRef}>
             <button
-              className="p-2 bg-gray-100 dark:bg-gray-800 rounded-full hover:bg-red-100 dark:hover:bg-red-900/30 hover:text-red-700 dark:hover:text-red-400 transition-all duration-300 group/share"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setShowSocialMenu(!showSocialMenu);
-              }}
+              className={`flex items-center justify-center w-7 h-7 rounded-lg transition-all duration-200 backdrop-blur-sm border ${
+                showSocialMenu 
+                  ? 'bg-red-50 dark:bg-red-900/40 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800' 
+                  : 'bg-white/80 dark:bg-gray-800/80 text-gray-600 dark:text-gray-400 border-gray-200/50 dark:border-gray-700/50 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-700 dark:hover:text-red-400 hover:border-red-200 dark:hover:border-red-800'
+              }`}
+              onClick={handleShareClick}
               aria-label="Share this post"
+              aria-expanded={showSocialMenu}
             >
-              <Share2 className="w-4 h-4 transform group-hover/share:scale-110 transition-transform" />
+              <Share2 className="w-3 h-3" />
             </button>
 
-            {/* Social Share Menu */}
+            {/* Social Share Menu - Optimized */}
             {showSocialMenu && (
-              <div className="absolute right-0 bottom-full mb-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl p-4 z-30 animate-in fade-in duration-200">
-                <div className="mb-2 text-xs font-semibold text-gray-500 dark:text-gray-400">
-                  Share this post
+              <div className="absolute right-0 bottom-full mb-2 bg-white/95 dark:bg-gray-900/95 border border-gray-200/50 dark:border-gray-700/50 rounded-lg shadow-xl p-2 z-50 backdrop-blur-sm min-w-[140px]">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                    Share
+                  </span>
+                  <button
+                    onClick={closeSocialMenu}
+                    className="p-0.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors rounded"
+                    aria-label="Close share menu"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
                 </div>
+                
+                {/* Fixed: Remove compact prop */}
                 <SocialShareButtons 
                   title={title} 
-                  slug={slug} 
+                  url={postUrl}
                   excerpt={cleanExcerpt}
+                  onShare={closeSocialMenu}
                 />
               </div>
             )}
           </div>
         </div>
       </div>
-
-      {/* Hover Border Effect */}
-      <div className="absolute inset-0 border-2 border-transparent group-hover:border-red-900/10 dark:group-hover:border-red-800/20 rounded-xl transition-all duration-500 pointer-events-none" />
     </article>
   );
 };

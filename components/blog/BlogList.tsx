@@ -5,19 +5,30 @@ import { BlogItemSkeleton } from '../skeleton/BlogItemSkeleton';
 import { getPosts, getAllCategories } from '@/lib/wordpress';
 import { Post, Category } from '@/types/blog';
 
-const BlogList: React.FC<{ showTitle?: boolean; currentPostSlug?: string | null }> = ({
+// Fixed: Added initialPosts prop
+interface BlogListProps {
+  showTitle?: boolean;
+  currentPostSlug?: string | null;
+  initialPosts?: Post[]; // Added for SSR hydration
+}
+
+const BlogList: React.FC<BlogListProps> = ({
   showTitle = true,
-  currentPostSlug = null
+  currentPostSlug = null,
+  initialPosts = [] // Default empty array
 }) => {
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
+  const [posts, setPosts] = useState<Post[]>(initialPosts);
+  const [filteredPosts, setFilteredPosts] = useState<Post[]>(initialPosts);
   const [categories, setCategories] = useState<Category[]>([]);
   const [activeCategory, setActiveCategory] = useState('all');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialPosts.length); // Only load if no initial posts
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchInitialData();
+    // Only fetch if no initial posts (client-side navigation)
+    if (initialPosts.length === 0) {
+      fetchInitialData();
+    }
   }, []);
 
   useEffect(() => {

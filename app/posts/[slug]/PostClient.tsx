@@ -5,7 +5,9 @@ import Header from '@/components/layout/Header';
 import { Post } from '@/types/blog';
 import ReadingControls from '@/components/shared/ReadingControls';
 import { useState, useEffect } from 'react';
+import { useApolloClient } from '@apollo/client/react';
 
+// Updated Social Sharing Component
 function PostSocialShareButtons({ title, slug, isRTL }: { 
   title: string; 
   slug: string; 
@@ -120,6 +122,7 @@ function PostSocialShareButtons({ title, slug, isRTL }: {
           </button>
         ))}
         
+        {/* Copy Link Button */}
         <button
           onClick={copyToClipboard}
           className={`flex flex-col items-center justify-center p-3 rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95 min-h-20 ${
@@ -147,6 +150,7 @@ function PostSocialShareButtons({ title, slug, isRTL }: {
   );
 }
 
+// Post Meta Information Component (Fixed categories error)
 function PostMetaInfo({ post, isRTL }: { 
   post: Post; 
   isRTL: boolean; 
@@ -158,6 +162,7 @@ function PostMetaInfo({ post, isRTL }: {
     return `${minutes} min read`;
   };
 
+  // Safe categories access
   const categories = post.categories?.nodes || [];
 
   return (
@@ -200,6 +205,7 @@ function PostMetaInfo({ post, isRTL }: {
   );
 }
 
+// Main Post Client Component
 interface PostClientProps {
   post: Post;
   slug: string;
@@ -210,6 +216,7 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
   const isTitleRTL = isUrdu;
   const isContentRTL = isUrdu;
   const currentIsRTL = isTitleRTL || isContentRTL;
+  const apolloClient = useApolloClient();
 
   const [fontSize, setFontSize] = useState(100);
   const [readingTheme, setReadingTheme] = useState<'light' | 'dark'>('light');
@@ -231,6 +238,11 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
     }
   }, [readingTheme]);
 
+  // Prefetch related posts when component mounts
+  useEffect(() => {
+    // This will be used for cache prefetching in future
+  }, [apolloClient]);
+
   return (
     <div className={`min-h-screen transition-colors duration-300 ${
       readingTheme === 'dark' 
@@ -244,6 +256,7 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
           className="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden"
           dir={currentIsRTL ? "rtl" : "ltr"}
         >
+          {/* Featured Image */}
           {post.featuredImage?.node?.sourceUrl && (
             <div className="w-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
               <div className="relative w-full h-[500px] mx-auto">
@@ -260,6 +273,7 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
           )}
 
           <div className="p-6 md:p-8">
+            {/* Title */}
             <h1
               className={`text-3xl md:text-4xl font-bold mb-6 leading-tight ${
                 currentIsRTL ? 'text-right' : 'text-left'
@@ -273,8 +287,10 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
               {post.title}
             </h1>
 
+            {/* Meta Information */}
             <PostMetaInfo post={post} isRTL={currentIsRTL} />
 
+            {/* Main Content */}
             <div
               id="blog-content"
               className={`wp-content max-w-none transition-all duration-300 ${
@@ -289,14 +305,17 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
               dangerouslySetInnerHTML={{ __html: post.content }}
             />
 
+            {/* Updated Social Sharing */}
             <PostSocialShareButtons title={post.title} slug={slug} isRTL={currentIsRTL} />
 
+            {/* Back to Posts */}
             <div className={`mt-8 pt-6 border-t border-gray-200 dark:border-gray-700 ${currentIsRTL ? 'text-right' : 'text-left'}`}>
               <Link
                 href="/"
                 className={`inline-flex items-center font-semibold transition-colors ${
                   currentIsRTL ? 'flex-row-reverse' : ''
                 } ${readingTheme === 'dark' ? 'text-red-400 hover:text-red-300' : 'text-red-900 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300'}`}
+                prefetch={true} // Enable prefetching for instant navigation
               >
                 <svg
                   className={`${currentIsRTL ? 'ml-2 rotate-180' : 'mr-2'} w-4 h-4`}
@@ -313,11 +332,13 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
         </article>
       </div>
 
+      {/* Reading Controls */}
       <ReadingControls 
         onFontSizeChange={setFontSize}
         onThemeChange={setReadingTheme}
       />
 
+      {/* Global Styles for Content */}
       <style jsx global>{`
         .wp-content {
           color: inherit;
@@ -345,6 +366,7 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
         .wp-content h5 { font-size: 1.25rem; }
         .wp-content h6 { font-size: 1.125rem; }
 
+        /* Urdu/Arabic Content Styling */
         .urdu-arabic-content {
           font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', 'Scheherazade New', serif;
           text-align: right;
@@ -367,6 +389,7 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
         .urdu-arabic-content h5 { font-size: 1.4rem; }
         .urdu-arabic-content h6 { font-size: 1.2rem; }
 
+        /* English Content Styling */
         .english-content {
           font-family: system-ui, -apple-system, sans-serif;
           text-align: left;
@@ -382,6 +405,7 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
           text-align: left;
         }
 
+        /* Reading Dark Mode */
         .reading-dark {
           --tw-bg-opacity: 1;
           background-color: rgb(17 24 39 / var(--tw-bg-opacity)) !important;
@@ -400,6 +424,7 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
           color: rgb(249 250 251) !important;
         }
 
+        /* Responsive */
         @media (max-width: 768px) {
           .wp-content h1 { font-size: 2rem; }
           .wp-content h2 { font-size: 1.75rem; }
