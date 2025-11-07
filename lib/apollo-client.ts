@@ -16,22 +16,22 @@ const authLink = setContext((_, { headers }) => {
   };
 });
 
-// Fixed: Proper error handler
-const errorLink = onError(({ graphQLErrors, networkError, operation, response }) => {
-  if (graphQLErrors) {
-    graphQLErrors.forEach(({ message, locations, path }) =>
+// Simple error handler that works with all versions
+const errorLink = onError((error: any) => {
+  if (error.graphQLErrors) {
+    error.graphQLErrors.forEach(({ message, locations, path }: any) =>
       console.log(
         `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`,
       ),
     );
   }
 
-  if (networkError) {
-    console.log(`[Network error]: ${networkError}`);
+  if (error.networkError) {
+    console.log(`[Network error]: ${error.networkError}`);
   }
 });
 
-// Enhanced cache configuration with normalization
+// Rest of the code remains same...
 export const cache = new InMemoryCache({
   typePolicies: {
     Query: {
@@ -48,10 +48,9 @@ export const cache = new InMemoryCache({
   },
 });
 
-let globalApolloClient: ApolloClient<any> | null = null;
+let globalApolloClient: any = null;
 
 function createApolloClient() {
-  // Fixed: Remove generic type parameter
   return new ApolloClient({
     ssrMode: typeof window === 'undefined',
     link: from([errorLink, authLink.concat(httpLink)]),
