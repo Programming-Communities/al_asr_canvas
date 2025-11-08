@@ -5,11 +5,16 @@ import Navigation from './Navigation';
 import ThemeToggle from '../shared/ThemeToggle';
 import SearchBar from '../shared/SearchBar';
 import MobileMenu from '../shared/MobileMenu';
+import CategoriesNavbar from './CategoriesNavbar';
+import SidebarMenu from './SidebarMenu';
+import { Menu } from 'lucide-react';
 
 const Header: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isCategoriesExpanded, setIsCategoriesExpanded] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -24,6 +29,31 @@ const Header: React.FC = () => {
     };
   }, []);
 
+  // Listen for categories expansion
+  useEffect(() => {
+    const handleCategoriesChange = () => {
+      // This will be triggered when categories expand/collapse
+      const categoriesNavbar = document.querySelector('.categories-navbar');
+      if (categoriesNavbar) {
+        const isExpanded = categoriesNavbar.classList.contains('py-6');
+        setIsCategoriesExpanded(isExpanded);
+      }
+    };
+
+    // Use MutationObserver to detect class changes
+    const observer = new MutationObserver(handleCategoriesChange);
+    const categoriesNavbar = document.querySelector('.categories-navbar');
+    if (categoriesNavbar) {
+      observer.observe(categoriesNavbar, {
+        attributes: true,
+        attributeFilter: ['class']
+      });
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  // Canvas animation code (existing code - same as before)
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -133,47 +163,73 @@ const Header: React.FC = () => {
   }, []);
 
   return (
-    <header className="relative bg-red-950 text-white overflow-hidden py-8 px-5 md:px-12 lg:px-28">
+    <header className={`relative bg-red-950 text-white overflow-hidden transition-all duration-300 ${
+      isCategoriesExpanded ? 'shadow-2xl' : ''
+    }`}>
       <canvas
         ref={canvasRef}
         className="absolute inset-0 w-full h-full pointer-events-none opacity-85"
       />
 
       <div className="relative z-10">
-        <div className="flex justify-between items-center">
-          <Logo />
-          <Navigation />
-          <div className="flex items-center gap-4">
-            {/* Desktop Search - Hidden on mobile */}
-            <div className="hidden md:block">
-              <SearchBar />
+        {/* Main Header */}
+        <div className={`py-8 px-5 md:px-12 lg:px-28 transition-all duration-300 ${
+          isCategoriesExpanded ? 'pb-4' : ''
+        }`}>
+          <div className="flex justify-between items-center">
+            <Logo />
+            <Navigation />
+            <div className="flex items-center gap-4">
+              {/* Desktop Search - Hidden on mobile */}
+              <div className="hidden md:block">
+                <SearchBar />
+              </div>
+
+              {/* Sidebar Menu Button */}
+              <button
+                onClick={() => setIsSidebarOpen(true)}
+                className="hidden md:flex items-center space-x-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 text-white px-4 py-2 rounded-lg transition-all duration-300 transform hover:scale-105"
+                aria-label="Open menu"
+              >
+                <Menu className="w-4 h-4" />
+                <span className="text-sm font-medium">Menu</span>
+              </button>
+              
+              {/* Mobile Menu */}
+              <MobileMenu />
+              
+              <ThemeToggle />
             </div>
-            
-            {/* Mobile Menu */}
-            <MobileMenu />
-            
-            <ThemeToggle />
+          </div>
+
+          <div className={`text-center transition-all duration-300 ${
+            isCategoriesExpanded ? 'my-8' : 'my-12'
+          }`}>
+            <h1 className="text-4xl sm:text-6xl font-bold mb-4 leading-tight drop-shadow-lg">
+              Al-Asr ( Islamic Service )
+            </h1>
+            <p className="mt-6 max-w-[740px] mx-auto text-lg leading-relaxed text-red-100">
+              Islamic services, calendar events, and community programs. Stay updated
+              with the latest from Al-Asr ( Islamic Service ).
+            </p>
+            <div className="flex justify-center mt-8">
+              <div className="bg-white/20 backdrop-blur-sm text-white px-8 py-4 rounded-xl shadow-xl border border-white/30 transform hover:scale-105 transition-all duration-300">
+                <p className="font-bold text-base">
+                  Islamic Calendar • Services • Community
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Mobile Search Overlay - Removed since it's now in MobileMenu */}
-        
-        <div className="text-center my-12">
-          <h1 className="text-4xl sm:text-6xl font-bold mb-4 leading-tight drop-shadow-lg">
-            Al-Asr ( Islamic Service )
-          </h1>
-          <p className="mt-6 max-w-[740px] mx-auto text-lg leading-relaxed text-red-100">
-            Islamic services, calendar events, and community programs. Stay updated
-            with the latest from Al-Asr ( Islamic Service ).
-          </p>
-          <div className="flex justify-center mt-8">
-            <div className="bg-white/20 backdrop-blur-sm text-white px-8 py-4 rounded-xl shadow-xl border border-white/30 transform hover:scale-105 transition-all duration-300">
-              <p className="font-bold text-base">
-                Islamic Calendar • Services • Community
-              </p>
-            </div>
-          </div>
-        </div>
+        {/* Categories Navigation Bar - Now Expandable */}
+        <CategoriesNavbar />
+
+        {/* Sidebar Menu Component */}
+        <SidebarMenu 
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+        />
       </div>
     </header>
   );

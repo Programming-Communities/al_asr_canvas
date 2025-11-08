@@ -2,6 +2,8 @@
 import React from 'react';
 import Header from './Header';
 import Footer from './Footer';
+import CategoriesTab from './CategoriesTab'; // ✅ YEH IMPORT KARO
+
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -9,12 +11,16 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
-    <div className="min-h-screen flex flex-col bg-white dark:bg-black">
+    <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900 transition-colors duration-300">
       <Header />
-      <main className="flex-1 bg-white dark:bg-black">
+      <main className="flex-1 relative">
         {children}
       </main>
       <Footer />
+      {/* <CategoriesTab /> ✅ YEH ADD KARO */}
+        
+    
+
     </div>
   );
 };
