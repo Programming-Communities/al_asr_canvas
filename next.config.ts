@@ -28,6 +28,8 @@ const nextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     formats: ['image/webp', 'image/avif'],
     minimumCacheTTL: 31536000,
+    // ✅ ADD THIS LINE TO FIX IMAGE QUALITY WARNING
+    qualities: [65, 75, 90],
   },
   productionBrowserSourceMaps: false,
   async headers() {

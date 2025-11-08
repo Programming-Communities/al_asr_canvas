@@ -1,6 +1,9 @@
 export interface Category {
+  id: string;
   slug: string;
   name: string;
+  count?: number;
+  parentId?: string | null;
   children?: Category[];
 }
 
@@ -32,5 +35,5 @@ export interface Post {
 export interface BlogListProps {
   showTitle?: boolean;
   currentPostSlug?: string | null;
-  initialPosts?: Post[]; // Added for SSR hydration
+  initialPosts?: Post[];
 }

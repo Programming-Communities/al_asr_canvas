@@ -5,27 +5,25 @@ import { BlogItemSkeleton } from '../skeleton/BlogItemSkeleton';
 import { getPosts, getAllCategories } from '@/lib/wordpress';
 import { Post, Category } from '@/types/blog';
 
-// Fixed: Added initialPosts prop
 interface BlogListProps {
   showTitle?: boolean;
   currentPostSlug?: string | null;
-  initialPosts?: Post[]; // Added for SSR hydration
+  initialPosts?: Post[];
 }
 
 const BlogList: React.FC<BlogListProps> = ({
   showTitle = true,
   currentPostSlug = null,
-  initialPosts = [] // Default empty array
+  initialPosts = []
 }) => {
   const [posts, setPosts] = useState<Post[]>(initialPosts);
   const [filteredPosts, setFilteredPosts] = useState<Post[]>(initialPosts);
   const [categories, setCategories] = useState<Category[]>([]);
   const [activeCategory, setActiveCategory] = useState('all');
-  const [loading, setLoading] = useState(!initialPosts.length); // Only load if no initial posts
+  const [loading, setLoading] = useState(!initialPosts.length);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Only fetch if no initial posts (client-side navigation)
     if (initialPosts.length === 0) {
       fetchInitialData();
     }
@@ -111,13 +109,13 @@ const BlogList: React.FC<BlogListProps> = ({
         </div>
       )}
 
-      {/* Category Filters */}
-      <div className='flex justify-center gap-2 my-8 flex-wrap'>
+      {/* Category Filters - YouTube Style */}
+      <div className="flex justify-start gap-2 my-8 overflow-x-auto pb-2 scrollbar-hide">
         <button
           onClick={() => setActiveCategory('all')}
-          className={`px-3 py-2 rounded-lg transition-colors text-sm ${
+          className={`px-4 py-2 rounded-full transition-all text-sm whitespace-nowrap ${
             activeCategory === 'all' 
-              ? 'bg-red-600 text-white' 
+              ? 'bg-red-600 text-white shadow-lg' 
               : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
           }`}
         >
@@ -127,9 +125,9 @@ const BlogList: React.FC<BlogListProps> = ({
           <button
             key={category.slug}
             onClick={() => setActiveCategory(category.slug)}
-            className={`px-3 py-2 rounded-lg transition-colors text-sm ${
+            className={`px-4 py-2 rounded-full transition-all text-sm whitespace-nowrap ${
               activeCategory === category.slug
-                ? 'bg-red-600 text-white'
+                ? 'bg-red-600 text-white shadow-lg'
                 : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
             }`}
           >
@@ -138,7 +136,7 @@ const BlogList: React.FC<BlogListProps> = ({
         ))}
       </div>
 
-      {/* Posts Grid - Improved spacing and responsiveness */}
+      {/* Posts Grid */}
       {loading ? (
         <div className='grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 mb-16'>
           {[1, 2, 3, 4, 5, 6, 7, 8].map((item) => (

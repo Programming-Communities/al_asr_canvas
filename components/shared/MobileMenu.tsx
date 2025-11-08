@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import SearchBar from './SearchBar';
+import { getAllCategories } from '@/lib/wordpress';
+import { Category } from '@/types/blog';
 import { 
   X, 
   Search, 
@@ -22,7 +24,9 @@ import {
   Download,
   Bookmark,
   ChevronUp,
-  ChevronDown
+  ChevronDown,
+  FolderOpen,
+  ChevronRight
 } from 'lucide-react';
 
 const MobileMenu: React.FC = () => {
@@ -32,6 +36,9 @@ const MobileMenu: React.FC = () => {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [menuScrollTop, setMenuScrollTop] = useState(0);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [categoriesOpen, setCategoriesOpen] = useState(false);
+  const [categoriesLoading, setCategoriesLoading] = useState(false);
   const pathname = usePathname();
 
   // Check if PWA is installed
@@ -56,10 +63,29 @@ const MobileMenu: React.FC = () => {
     };
   }, []);
 
+  // Fetch categories when menu opens
+  useEffect(() => {
+    if (isOpen && categories.length === 0) {
+      fetchCategories();
+    }
+  }, [isOpen]);
+
+  const fetchCategories = async () => {
+    try {
+      setCategoriesLoading(true);
+      const categoriesData = await getAllCategories();
+      setCategories(categoriesData);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    } finally {
+      setCategoriesLoading(false);
+    }
+  };
+
   const menuItems = [
     { name: 'Home', href: '/', icon: Home, color: 'text-blue-400', badge: null },
     { name: 'About', href: '/about', icon: Info, color: 'text-emerald-400', badge: null },
-    { name: 'Services', href: '/services', icon: Settings, color: 'text-purple-400', badge: 'New' },
+    { name: 'Services', href: '/services', icon: Settings, color: 'text-purple-400', badge: null },
     { name: 'Events', href: '/events', icon: Sparkles, color: 'text-amber-400', badge: 'Soon' },
     { name: 'Islamic Calendar', href: '/islamic-calendar', icon: Calendar, color: 'text-orange-400', badge: null },
     { name: 'Quran Classes', href: '/quran-classes', icon: BookOpen, color: 'text-cyan-400', badge: null },
@@ -73,13 +99,14 @@ const MobileMenu: React.FC = () => {
     { name: 'Prayer Times', href: '/prayer-times', icon: '🕋', color: 'bg-green-500' },
     { name: 'Islamic Calendar', href: '/islamic-calendar', icon: '📅', color: 'bg-orange-500' },
     { name: 'Quran Reading', href: '/quran-classes', icon: '📖', color: 'bg-blue-500' },
-    { name: 'Donate', href: '/donate', icon: '💰', color: 'bg-emerald-500' },
+    { name: 'All Categories', href: '#categories', icon: '📚', color: 'bg-purple-500', action: () => setCategoriesOpen(true) },
   ];
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
     if (isOpen) {
       setShowSearch(false);
+      setCategoriesOpen(false);
       setMenuScrollTop(0);
       document.body.style.overflow = 'auto';
     } else {
@@ -90,6 +117,7 @@ const MobileMenu: React.FC = () => {
   const closeMenu = () => {
     setIsOpen(false);
     setShowSearch(false);
+    setCategoriesOpen(false);
     setMenuScrollTop(0);
     document.body.style.overflow = 'auto';
   };
@@ -131,6 +159,10 @@ const MobileMenu: React.FC = () => {
     return pathname === href;
   };
 
+  const isCategoryActive = (categorySlug: string) => {
+    return pathname === `/categories/${categorySlug}`;
+  };
+
   const handleMenuScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const scrollTop = e.currentTarget.scrollTop;
     setMenuScrollTop(scrollTop);
@@ -148,6 +180,14 @@ const MobileMenu: React.FC = () => {
     const menuContent = document.getElementById('menu-content');
     if (menuContent) {
       menuContent.scrollTo({ top: menuContent.scrollHeight, behavior: 'smooth' });
+    }
+  };
+
+  const handleQuickAction = (action: any) => {
+    if (action.action) {
+      action.action();
+    } else {
+      closeMenu();
     }
   };
 
@@ -237,17 +277,16 @@ const MobileMenu: React.FC = () => {
                 <h3 className="text-xs font-semibold text-gray-400 mb-2 px-1">Quick Access</h3>
                 <div className="grid grid-cols-4 gap-1">
                   {quickActions.map((action) => (
-                    <Link
+                    <button
                       key={action.name}
-                      href={action.href}
-                      onClick={closeMenu}
+                      onClick={() => handleQuickAction(action)}
                       className="flex flex-col items-center p-1 bg-gray-800 rounded-lg hover:bg-gray-700 transition-all duration-200 group"
                     >
                       <div className={`w-8 h-8 rounded flex items-center justify-center text-white text-sm ${action.color} group-hover:scale-110 transition-transform`}>
                         {action.icon}
                       </div>
                       <span className="text-[10px] text-gray-300 mt-1 text-center leading-tight">{action.name}</span>
-                    </Link>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -285,6 +324,89 @@ const MobileMenu: React.FC = () => {
               {/* Premium Navigation Links - Optimized for Mobile */}
               <nav className="p-3">
                 <div className="space-y-1">
+                  {/* Categories Section */}
+                  <div className="mb-2">
+                    <button
+                      onClick={() => setCategoriesOpen(!categoriesOpen)}
+                      className={`group relative flex items-center gap-3 p-3 rounded-xl border transition-all duration-300 min-h-12 w-full text-left ${
+                        categoriesOpen 
+                          ? 'bg-red-600/20 text-white border-red-500/30 shadow-md' 
+                          : 'text-gray-300 hover:text-white bg-gray-800 hover:bg-linear-to-r hover:from-red-600/20 hover:to-red-700/20 border-gray-700 hover:border-red-500/30'
+                      }`}
+                    >
+                      {/* Icon Container */}
+                      <div className={`flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-300 ${
+                        categoriesOpen 
+                          ? 'bg-red-600 scale-105' 
+                          : 'bg-gray-700 group-hover:bg-red-600'
+                      } text-purple-400`}>
+                        <FolderOpen className="w-4 h-4" />
+                      </div>
+                      
+                      {/* Text Content */}
+                      <div className="flex-1 flex items-center justify-between">
+                        <span className="font-medium text-sm">All Categories</span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-purple-500 text-white">
+                          {categories.length}
+                        </span>
+                      </div>
+                      
+                      {/* Animated Arrow */}
+                      <ChevronRight
+                        className={`w-3 h-3 transform transition-all duration-300 ${
+                          categoriesOpen ? 'text-red-400 rotate-90' : 'text-gray-500 group-hover:text-red-400'
+                        }`}
+                      />
+                    </button>
+
+                    {/* Categories Dropdown */}
+                    {categoriesOpen && (
+                      <div className="ml-4 mt-2 space-y-1 border-l-2 border-red-500/30 pl-3 animate-in fade-in duration-300">
+                        {categoriesLoading ? (
+                          // Loading Skeleton
+                          Array.from({ length: 5 }).map((_, index) => (
+                            <div key={index} className="flex items-center gap-3 p-2 rounded-lg bg-gray-800/50 animate-pulse">
+                              <div className="w-6 h-6 bg-gray-700 rounded"></div>
+                              <div className="h-4 bg-gray-700 rounded flex-1"></div>
+                            </div>
+                          ))
+                        ) : categories.length > 0 ? (
+                          categories.map((category) => {
+                            const isActive = isCategoryActive(category.slug);
+                            
+                            return (
+                              <Link
+                                key={category.slug}
+                                href={`/categories/${category.slug}`}
+                                onClick={closeMenu}
+                                className={`group flex items-center gap-3 p-2 rounded-lg transition-all duration-200 ${
+                                  isActive
+                                    ? 'bg-red-600/20 text-white border border-red-500/30'
+                                    : 'text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-700/70 border border-transparent hover:border-red-500/20'
+                                }`}
+                              >
+                                <div className={`w-6 h-6 rounded flex items-center justify-center text-xs ${
+                                  isActive ? 'bg-red-600' : 'bg-gray-700 group-hover:bg-red-600'
+                                }`}>
+                                  📁
+                                </div>
+                                <span className="text-sm flex-1">{category.name}</span>
+                                {isActive && (
+                                  <div className="w-1.5 h-1.5 bg-red-400 rounded-full animate-pulse" />
+                                )}
+                              </Link>
+                            );
+                          })
+                        ) : (
+                          <div className="text-center py-4 text-gray-500 text-sm">
+                            No categories found
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Regular Menu Items */}
                   {menuItems.map((item) => {
                     const IconComponent = item.icon;
                     const isActive = isActiveLink(item.href);
@@ -324,21 +446,11 @@ const MobileMenu: React.FC = () => {
                         </div>
                         
                         {/* Animated Arrow */}
-                        <svg
+                        <ChevronRight
                           className={`w-3 h-3 transform transition-all duration-300 ${
                             isActive ? 'text-red-400' : 'text-gray-500 group-hover:text-red-400 group-hover:translate-x-0.5'
                           }`}
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 5l7 7-7 7"
-                          />
-                        </svg>
+                        />
 
                         {/* Active Indicator */}
                         {isActive && (

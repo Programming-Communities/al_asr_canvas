@@ -15,7 +15,7 @@ async function fetchGraphQL(query: string, variables?: any) {
           query,
           variables,
         }),
-        next: { revalidate: 60 } // ISR: Revalidate every 60 seconds
+        next: { revalidate: 60 }
       }
     );
 
@@ -37,23 +37,7 @@ async function fetchGraphQL(query: string, variables?: any) {
   }
 }
 
-// Define GraphQL response types
-interface PostsResponse {
-  posts: {
-    nodes: Post[];
-  };
-}
-
-interface PostResponse {
-  post: Post;
-}
-
-interface CategoriesResponse {
-  categories: {
-    nodes: Category[];
-  };
-}
-
+// ✅ GET ALL POSTS FUNCTION
 export async function getPosts(): Promise<Post[]> {
   try {
     const data = await fetchGraphQL(`
@@ -88,7 +72,6 @@ export async function getPosts(): Promise<Post[]> {
       }
     `);
 
-    // Check if data exists and has the expected structure
     if (!data?.posts?.nodes) {
       console.warn('No posts data found in response');
       return [];
@@ -133,7 +116,6 @@ export async function getPost(slug: string): Promise<Post | null> {
       }
     `, { slug });
 
-    // Check if data exists and has the expected structure
     if (!data?.post) {
       console.warn(`No post found for slug: ${slug}`);
       return null;
@@ -146,28 +128,103 @@ export async function getPost(slug: string): Promise<Post | null> {
   }
 }
 
+// ✅ GET ALL CATEGORIES WITH HIERARCHY
 export async function getAllCategories(): Promise<Category[]> {
   try {
     const data = await fetchGraphQL(`
       query GetCategories {
-        categories {
+        categories(first: 100, where: {hideEmpty: false}) {
           nodes {
+            id
             slug
             name
+            count
+            parent {
+              node {
+                id
+                slug
+                name
+              }
+            }
           }
         }
       }
     `);
 
-    // Check if data exists and has the expected structure
     if (!data?.categories?.nodes) {
       console.warn('No categories data found in response');
       return [];
     }
 
-    return data.categories.nodes;
+    // Organize categories with hierarchy
+    const allCategories = data.categories.nodes;
+    const categoriesWithHierarchy = organizeCategoriesHierarchy(allCategories);
+    
+    return categoriesWithHierarchy;
   } catch (error) {
     console.error('Error fetching categories:', error);
     return [];
   }
+}
+
+// Helper function to organize categories hierarchically
+function organizeCategoriesHierarchy(categories: any[]): Category[] {
+  const categoryMap = new Map();
+  const rootCategories: Category[] = [];
+
+  // First pass: create map of all categories
+  categories.forEach(category => {
+    const categoryData: Category = {
+      id: category.id,
+      slug: category.slug,
+      name: category.name,
+      count: category.count || 0,
+      parentId: category.parent?.node?.id || null,
+      children: []
+    };
+
+    categoryMap.set(category.id, categoryData);
+  });
+
+  // Second pass: build hierarchy
+  categories.forEach(category => {
+    const categoryData = categoryMap.get(category.id);
+    
+    if (category.parent?.node) {
+      // This is a child category
+      const parentCategory = categoryMap.get(category.parent.node.id);
+      if (parentCategory) {
+        parentCategory.children = parentCategory.children || [];
+        parentCategory.children.push(categoryData);
+      }
+    } else {
+      // This is a root category (no parent)
+      rootCategories.push(categoryData);
+    }
+  });
+
+  return rootCategories;
+}
+
+// ✅ SIMPLE: Get posts by category using filtering (No GraphQL errors)
+export async function getPostsByCategory(categorySlug: string): Promise<Post[]> {
+  try {
+    // Get all posts and filter by category
+    const allPosts = await getPosts();
+    
+    const filteredPosts = allPosts.filter(post => 
+      post.categories?.nodes?.some((cat: any) => cat.slug === categorySlug)
+    );
+
+    console.log(`Found ${filteredPosts.length} posts for category: ${categorySlug}`);
+    return filteredPosts;
+  } catch (error) {
+    console.error('Error in getPostsByCategory:', error);
+    return [];
+  }
+}
+
+// ✅ GET ALL POSTS FOR CATEGORIES PAGE
+export async function getAllPosts(): Promise<Post[]> {
+  return await getPosts();
 }
