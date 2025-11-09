@@ -98,10 +98,13 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <meta name="theme-color" content="#991b1b" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
         
-        {/* ✅ Apple Touch Icons */}
-        <link rel="preconnect" href="https://admin-al-asr.centers.pk" crossOrigin="anonymous" />
+        {/* ✅ Performance Optimizations */}
         <link rel="dns-prefetch" href="https://admin-al-asr.centers.pk" />
+        <link rel="preconnect" href="https://admin-al-asr.centers.pk" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         
+        {/* ✅ Apple Touch Icons */}
         <link rel="apple-touch-icon" href="/ios/180.png" />
         <link rel="apple-touch-icon" sizes="152x152" href="/ios/152.png" />
         <link rel="apple-touch-icon" sizes="180x180" href="/ios/180.png" />
@@ -114,25 +117,10 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/android/android-launchericon-48-48.png" />
 
-        {/* ✅ Preconnect + Prefetch - Optimized */}
-        <link
-          rel="preconnect"
-          href="https://fonts.googleapis.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
-        <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
-        <link rel="dns-prefetch" href="https://admin-al-asr.centers.pk" />
-
-        {/* ✅ Google Fonts - Simplified */}
+        {/* ✅ Google Fonts - Optimized */}
         <link
           rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap&display=swap"
         />
 
         {/* ✅ OG + Twitter Meta */}
@@ -151,7 +139,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <style
           dangerouslySetInnerHTML={{
             __html: `
-              /*! Critical Above-the-Fold CSS */
+              /*! Critical Above-the-Fold CSS - Optimized */
               :root {
                 --background: #ffffff;
                 --foreground: #171717;
@@ -183,14 +171,6 @@ export default function RootLayout({ children }: RootLayoutProps) {
                 line-height: 1.6;
                 overflow-x: hidden;
                 min-height: 100vh;
-                opacity: 1 !important;
-              }
-              
-              /* Fix for Next.js Image fill positioning */
-              .next-image-container {
-                position: relative !important;
-                width: 100%;
-                height: 100%;
               }
               
               /* Header Critical Styles */
@@ -225,28 +205,6 @@ export default function RootLayout({ children }: RootLayoutProps) {
                 border-radius: 2px;
               }
               
-              /* PWA Install Button */
-              #install-button {
-                display: none;
-                position: fixed;
-                bottom: 20px;
-                right: 20px;
-                z-index: 1000;
-                background: #991b1b;
-                color: white;
-                border: none;
-                padding: 10px 15px;
-                border-radius: 8px;
-                cursor: pointer;
-                font-size: 14px;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-              }
-              
-              #install-button:hover {
-                background: #7f1d1d;
-                transform: translateY(-1px);
-              }
-              
               /* Loading states */
               .skeleton {
                 background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
@@ -273,11 +231,11 @@ export default function RootLayout({ children }: RootLayoutProps) {
       </head>
 
       <body className={`${inter.className} antialiased`}>
-        {/* ✅ Performance Monitoring */}
-        <PerformanceMonitor />
+        {/* ✅ Performance Monitoring - Only in development */}
+        {process.env.NODE_ENV === 'development' && <PerformanceMonitor />}
         
         {/* ✅ PWA Install Button */}
-        <button id="install-button" className="hidden md:flex items-center gap-2">
+        <button id="install-button" className="hidden md:flex items-center gap-2" aria-label="Install App">
           <span>📱</span>
           Install App
         </button>
@@ -290,12 +248,17 @@ export default function RootLayout({ children }: RootLayoutProps) {
           </ApolloWrapper>
         </ThemeProvider>
 
-        {/* ✅ Analytics */}
-        <SpeedInsights />
-        <Analytics />
+        {/* ✅ Analytics - Only in production */}
+        {process.env.NODE_ENV === 'production' && (
+          <>
+            <SpeedInsights />
+            <Analytics />
+          </>
+        )}
 
         {/* ✅ PWA Script - Deferred */}
         <script
+          defer
           dangerouslySetInnerHTML={{
             __html: `
               // PWA Install Prompt - Deferred

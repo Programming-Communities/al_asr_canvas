@@ -39,18 +39,17 @@ const MobileMenu: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
   const [categoriesLoading, setCategoriesLoading] = useState(false);
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const pathname = usePathname();
 
   // Check if PWA is installed
   const [isPWA, setIsPWA] = useState(false);
 
   useEffect(() => {
-    // Check if app is running as PWA
     if (window.matchMedia('(display-mode: standalone)').matches) {
       setIsPWA(true);
     }
 
-    // Listen for beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: any) => {
       e.preventDefault();
       setDeferredPrompt(e);
@@ -107,6 +106,7 @@ const MobileMenu: React.FC = () => {
     if (isOpen) {
       setShowSearch(false);
       setCategoriesOpen(false);
+      setExpandedCategories(new Set());
       setMenuScrollTop(0);
       document.body.style.overflow = 'auto';
     } else {
@@ -118,6 +118,7 @@ const MobileMenu: React.FC = () => {
     setIsOpen(false);
     setShowSearch(false);
     setCategoriesOpen(false);
+    setExpandedCategories(new Set());
     setMenuScrollTop(0);
     document.body.style.overflow = 'auto';
   };
@@ -149,7 +150,6 @@ const MobileMenu: React.FC = () => {
         console.log('Error sharing:', err);
       }
     } else {
-      // Fallback: copy to clipboard
       navigator.clipboard.writeText(window.location.href);
       alert('Link copied to clipboard!');
     }
@@ -189,6 +189,71 @@ const MobileMenu: React.FC = () => {
     } else {
       closeMenu();
     }
+  };
+
+  const toggleCategory = (categorySlug: string) => {
+    setExpandedCategories(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(categorySlug)) {
+        newSet.delete(categorySlug);
+      } else {
+        newSet.add(categorySlug);
+      }
+      return newSet;
+    });
+  };
+
+  // Recursive function to render categories with sub-categories
+  const renderCategoryItem = (category: Category, level: number = 0) => {
+    const hasChildren = category.children && category.children.length > 0;
+    const isExpanded = expandedCategories.has(category.slug);
+    const isActive = isCategoryActive(category.slug);
+
+    return (
+      <div key={category.id} className={`${level > 0 ? 'ml-4' : ''}`}>
+        <div className="flex items-center justify-between">
+          <Link
+            href={`/categories/${category.slug}`}
+            onClick={closeMenu}
+            className={`flex-1 py-3 text-sm transition-all duration-200 rounded-lg px-3 ${
+              isActive
+                ? 'bg-red-600 text-white shadow-md'
+                : 'text-gray-300 hover:text-white hover:bg-red-600/30'
+            } ${level > 0 ? 'border-l-2 border-red-500/30 ml-2' : ''}`}
+          >
+            <span className="flex items-center gap-3">
+              {level > 0 && <div className="w-1 h-1 bg-red-400 rounded-full"></div>}
+              <span className="font-medium">{category.name}</span>
+              {category.count && category.count > 0 && (
+                <span className="text-xs bg-white/20 text-white px-2 py-1 rounded-full">
+                  {category.count}
+                </span>
+              )}
+            </span>
+          </Link>
+          
+          {hasChildren && (
+            <button
+              onClick={() => toggleCategory(category.slug)}
+              className="p-2 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-white/10"
+            >
+              <ChevronRight 
+                className={`w-4 h-4 transform transition-transform duration-200 ${
+                  isExpanded ? 'rotate-90 text-red-400' : ''
+                }`} 
+              />
+            </button>
+          )}
+        </div>
+
+        {/* Sub-categories with smooth animation */}
+        {hasChildren && isExpanded && (
+          <div className="mt-1 ml-2 border-l-2 border-red-500/20 pl-4 animate-in fade-in duration-200">
+            {category.children!.map(child => renderCategoryItem(child, level + 1))}
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -359,9 +424,9 @@ const MobileMenu: React.FC = () => {
                       />
                     </button>
 
-                    {/* Categories Dropdown */}
+                    {/* Categories Dropdown with SUB-CATEGORIES */}
                     {categoriesOpen && (
-                      <div className="ml-4 mt-2 space-y-1 border-l-2 border-red-500/30 pl-3 animate-in fade-in duration-300">
+                      <div className="ml-4 mt-2 space-y-2 border-l-2 border-red-500/30 pl-3 animate-in fade-in duration-300">
                         {categoriesLoading ? (
                           // Loading Skeleton
                           Array.from({ length: 5 }).map((_, index) => (
@@ -371,32 +436,13 @@ const MobileMenu: React.FC = () => {
                             </div>
                           ))
                         ) : categories.length > 0 ? (
-                          categories.map((category) => {
-                            const isActive = isCategoryActive(category.slug);
-                            
-                            return (
-                              <Link
-                                key={category.slug}
-                                href={`/categories/${category.slug}`}
-                                onClick={closeMenu}
-                                className={`group flex items-center gap-3 p-2 rounded-lg transition-all duration-200 ${
-                                  isActive
-                                    ? 'bg-red-600/20 text-white border border-red-500/30'
-                                    : 'text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-700/70 border border-transparent hover:border-red-500/20'
-                                }`}
-                              >
-                                <div className={`w-6 h-6 rounded flex items-center justify-center text-xs ${
-                                  isActive ? 'bg-red-600' : 'bg-gray-700 group-hover:bg-red-600'
-                                }`}>
-                                  📁
-                                </div>
-                                <span className="text-sm flex-1">{category.name}</span>
-                                {isActive && (
-                                  <div className="w-1.5 h-1.5 bg-red-400 rounded-full animate-pulse" />
-                                )}
-                              </Link>
-                            );
-                          })
+                          <div className="space-y-2">
+                            {categories.map((category) => (
+                              <div key={category.id}>
+                                {renderCategoryItem(category)}
+                              </div>
+                            ))}
+                          </div>
                         ) : (
                           <div className="text-center py-4 text-gray-500 text-sm">
                             No categories found

@@ -1,11 +1,25 @@
 /** @type {import('next').NextConfig} */
+const withPWA = require('next-pwa')({
+  dest: 'public',
+  register: true,
+  skipWaiting: true,
+  disable: process.env.NODE_ENV === 'development',
+});
+
 const nextConfig = {
+  // Turbopack configuration
   experimental: {
-    optimizeCss: true,
+    turbo: {
+      // Turbopack specific optimizations
+    }
   },
+  
+  // Compiler options
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
+  
+  // Images configuration
   images: {
     remotePatterns: [
       {
@@ -13,25 +27,14 @@ const nextConfig = {
         hostname: 'admin-al-asr.centers.pk',
         pathname: '/**',
       },
-      {
-        protocol: 'https',
-        hostname: 'al-asr.centers.pk', 
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: '**.centers.pk',
-        pathname: '/**',
-      },
     ],
+    formats: ['image/webp', 'image/avif'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    formats: ['image/webp', 'image/avif'],
-    minimumCacheTTL: 31536000,
-    // ✅ ADD THIS LINE TO FIX IMAGE QUALITY WARNING
-    qualities: [65, 75, 90],
+    minimumCacheTTL: 60,
   },
-  productionBrowserSourceMaps: false,
+  
+  // Security headers
   async headers() {
     return [
       {
@@ -42,7 +45,7 @@ const nextConfig = {
             value: 'nosniff'
           },
           {
-            key: 'X-Frame-Options', 
+            key: 'X-Frame-Options',
             value: 'DENY'
           },
           {
@@ -50,9 +53,12 @@ const nextConfig = {
             value: '1; mode=block'
           }
         ],
-      },
-    ]
+      }
+    ];
   },
+  
+  poweredByHeader: false,
+  compress: true,
 }
 
-module.exports = nextConfig
+module.exports = withPWA(nextConfig);
