@@ -225,6 +225,48 @@ export default function RootLayout({ children }: RootLayoutProps) {
                   transition-duration: 0.01ms !important;
                 }
               }
+
+              /* Install Button Styles */
+              #install-button {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                z-index: 1000;
+                background: #991b1b;
+                color: white;
+                border: none;
+                padding: 12px 16px;
+                border-radius: 12px;
+                cursor: pointer;
+                font-size: 14px;
+                font-weight: 600;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+                transition: all 0.3s ease;
+                display: none;
+                align-items: center;
+                gap: 8px;
+                backdrop-filter: blur(10px);
+                border: 2px solid rgba(255,255,255,0.2);
+              }
+
+              #install-button:hover {
+                background: #7f1d1d;
+                transform: translateY(-2px);
+                box-shadow: 0 6px 25px rgba(0,0,0,0.4);
+              }
+
+              #install-button:active {
+                transform: translateY(0);
+              }
+
+              @media (max-width: 768px) {
+                #install-button {
+                  bottom: 80px;
+                  right: 20px;
+                  padding: 14px 18px;
+                  font-size: 15px;
+                }
+              }
             `,
           }}
         />
@@ -234,9 +276,13 @@ export default function RootLayout({ children }: RootLayoutProps) {
         {/* ✅ Performance Monitoring - Only in development */}
         {process.env.NODE_ENV === 'development' && <PerformanceMonitor />}
         
-        {/* ✅ PWA Install Button */}
-        <button id="install-button" className="hidden md:flex items-center gap-2" aria-label="Install App">
-          <span>📱</span>
+        {/* ✅ PWA Install Button - FIXED POSITION */}
+        <button 
+          id="install-button" 
+          aria-label="Install App"
+          style={{ display: 'none' }}
+        >
+          <span style={{ fontSize: '18px' }}>📱</span>
           Install App
         </button>
 
@@ -256,57 +302,128 @@ export default function RootLayout({ children }: RootLayoutProps) {
           </>
         )}
 
-        {/* ✅ PWA Script - Deferred */}
+        {/* ✅ PWA Script - FIXED & IMPROVED */}
         <script
-          defer
           dangerouslySetInnerHTML={{
             __html: `
-              // PWA Install Prompt - Deferred
-              let deferredPrompt;
-              window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                deferredPrompt = e;
-                
-                // Show install button after 3 seconds
-                setTimeout(() => {
-                  const installButton = document.getElementById('install-button');
-                  if (installButton && deferredPrompt) {
-                    installButton.style.display = 'flex';
-                    
-                    installButton.addEventListener('click', async () => {
-                      if (deferredPrompt) {
-                        deferredPrompt.prompt();
-                        const { outcome } = await deferredPrompt.userChoice;
-                        if (outcome === 'accepted') {
-                          installButton.style.display = 'none';
-                          deferredPrompt = null;
-                        }
-                      }
-                    });
-                    
-                    // Auto-hide after 10 seconds
-                    setTimeout(() => {
-                      if (installButton.style.display !== 'none') {
-                        installButton.style.display = 'none';
-                      }
-                    }, 10000);
-                  }
-                }, 3000);
-              });
+              (function() {
+                let deferredPrompt;
+                let installButton;
 
-              // Service Worker Registration for PWA
-              if ('serviceWorker' in navigator) {
-                window.addEventListener('load', () => {
-                  navigator.serviceWorker.register('/sw.js').then(
-                    (registration) => {
-                      console.log('SW registered: ', registration);
-                    },
-                    (registrationError) => {
-                      console.log('SW registration failed: ', registrationError);
+                function initializePWA() {
+                  installButton = document.getElementById('install-button');
+                  
+                  if (!installButton) {
+                    console.error('Install button element not found');
+                    return;
+                  }
+
+                  // Install button click handler
+                  installButton.addEventListener('click', async function() {
+                    console.log('Install button clicked');
+                    
+                    if (deferredPrompt) {
+                      try {
+                        deferredPrompt.prompt();
+                        const choiceResult = await deferredPrompt.userChoice;
+                        
+                        console.log('User choice:', choiceResult.outcome);
+                        
+                        if (choiceResult.outcome === 'accepted') {
+                          console.log('User accepted the install prompt');
+                          hideInstallButton();
+                        } else {
+                          console.log('User dismissed the install prompt');
+                        }
+                        
+                        deferredPrompt = null;
+                      } catch (error) {
+                        console.error('Error during install prompt:', error);
+                      }
                     }
-                  );
+                  });
+
+                  // Check if already installed
+                  if (isPWAInstalled()) {
+                    console.log('App is already installed');
+                    hideInstallButton();
+                    return;
+                  }
+
+                  console.log('PWA initialization complete');
+                }
+
+                // Before install prompt event
+                window.addEventListener('beforeinstallprompt', function(e) {
+                  console.log('beforeinstallprompt event fired');
+                  e.preventDefault();
+                  deferredPrompt = e;
+                  
+                  // Show install button after a short delay
+                  setTimeout(function() {
+                    if (!isPWAInstalled() && deferredPrompt) {
+                      showInstallButton();
+                    }
+                  }, 2000);
                 });
-              }
+
+                // After app is installed
+                window.addEventListener('appinstalled', function(evt) {
+                  console.log('PWA was successfully installed');
+                  hideInstallButton();
+                  deferredPrompt = null;
+                });
+
+                // Page load event
+                window.addEventListener('load', function() {
+                  console.log('Page loaded, initializing PWA...');
+                  initializePWA();
+                  
+                  // Service Worker Registration
+                  if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.register('/sw.js')
+                      .then(function(registration) {
+                        console.log('SW registered: ', registration);
+                      })
+                      .catch(function(registrationError) {
+                        console.log('SW registration failed: ', registrationError);
+                      });
+                  }
+                });
+
+                function showInstallButton() {
+                  if (installButton && !isPWAInstalled()) {
+                    installButton.style.display = 'flex';
+                    console.log('Showing install button');
+                    
+                    // Auto-hide after 15 seconds
+                    setTimeout(function() {
+                      if (installButton.style.display !== 'none') {
+                        hideInstallButton();
+                      }
+                    }, 15000);
+                  }
+                }
+
+                function hideInstallButton() {
+                  if (installButton) {
+                    installButton.style.display = 'none';
+                    console.log('Hiding install button');
+                  }
+                }
+
+                function isPWAInstalled() {
+                  return window.matchMedia('(display-mode: standalone)').matches ||
+                         window.navigator.standalone === true;
+                }
+
+                // Initialize when DOM is ready
+                if (document.readyState === 'loading') {
+                  document.addEventListener('DOMContentLoaded', initializePWA);
+                } else {
+                  initializePWA();
+                }
+              })();
             `,
           }}
         />

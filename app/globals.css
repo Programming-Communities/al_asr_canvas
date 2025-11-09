@@ -25,6 +25,7 @@ body {
 }
 
 /* Header Background */
+
 .header-bg {
   background: var(--header-bg) !important;
   color: var(--header-text) !important;

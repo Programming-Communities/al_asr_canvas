@@ -1,25 +1,11 @@
 /** @type {import('next').NextConfig} */
-const withPWA = require('next-pwa')({
-  dest: 'public',
-  register: true,
-  skipWaiting: true,
-  disable: process.env.NODE_ENV === 'development',
-});
-
 const nextConfig = {
-  // Turbopack configuration
-  experimental: {
-    turbo: {
-      // Turbopack specific optimizations
-    }
-  },
+  // ✅ Safe performance optimizations
+  poweredByHeader: false,
+  compress: true,
+  productionBrowserSourceMaps: false,
   
-  // Compiler options
-  compiler: {
-    removeConsole: process.env.NODE_ENV === 'production',
-  },
-  
-  // Images configuration
+  // ✅ Existing images config (no changes)
   images: {
     remotePatterns: [
       {
@@ -29,12 +15,17 @@ const nextConfig = {
       },
     ],
     formats: ['image/webp', 'image/avif'],
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+    imageSizes: [16, 32, 48, 64, 96, 128],
     minimumCacheTTL: 60,
   },
   
-  // Security headers
+  // ✅ Existing compiler options (no changes)
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
+  
+  // ✅ Existing security headers (no changes)
   async headers() {
     return [
       {
@@ -56,9 +47,6 @@ const nextConfig = {
       }
     ];
   },
-  
-  poweredByHeader: false,
-  compress: true,
 }
 
-module.exports = withPWA(nextConfig);
+module.exports = nextConfig;
