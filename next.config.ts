@@ -1,11 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // ✅ Safe performance optimizations
-  poweredByHeader: false,
-  compress: true,
-  productionBrowserSourceMaps: false,
-  
-  // ✅ Existing images config (no changes)
+  experimental: {
+    optimizeCss: true,
+  },
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
   images: {
     remotePatterns: [
       {
@@ -13,19 +13,25 @@ const nextConfig = {
         hostname: 'admin-al-asr.centers.pk',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'al-asr.centers.pk', 
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.centers.pk',
+        pathname: '/**',
+      },
     ],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     formats: ['image/webp', 'image/avif'],
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
-    imageSizes: [16, 32, 48, 64, 96, 128],
-    minimumCacheTTL: 60,
+    minimumCacheTTL: 31536000,
+    // ✅ ADD THIS LINE TO FIX IMAGE QUALITY WARNING
+    qualities: [65, 75, 90],
   },
-  
-  // ✅ Existing compiler options (no changes)
-  compiler: {
-    removeConsole: process.env.NODE_ENV === 'production',
-  },
-  
-  // ✅ Existing security headers (no changes)
+  productionBrowserSourceMaps: false,
   async headers() {
     return [
       {
@@ -36,7 +42,7 @@ const nextConfig = {
             value: 'nosniff'
           },
           {
-            key: 'X-Frame-Options',
+            key: 'X-Frame-Options', 
             value: 'DENY'
           },
           {
@@ -44,9 +50,9 @@ const nextConfig = {
             value: '1; mode=block'
           }
         ],
-      }
-    ];
+      },
+    ]
   },
 }
 
-module.exports = nextConfig;
+module.exports = nextConfig
