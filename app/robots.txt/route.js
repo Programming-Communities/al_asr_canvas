@@ -1,22 +1,29 @@
 // app/robots.txt/route.js
 export async function GET() {
   const baseUrl = 'https://al-asr.centers.pk'
-  
+
   const robotsTxt = `
 User-agent: *
 Allow: /
 
-# Block admin and API routes
+# 🔒 Block sensitive/admin endpoints
 Disallow: /api/
 Disallow: /admin/
 Disallow: /wp-admin/
 Disallow: /wp-json/
 
-# Block Next.js internal routes
+# ⚙️ Block framework-internal assets
 Disallow: /_next/
 Disallow: /_vercel/
+Disallow: /private/
+Disallow: /tmp/
 
-# Sitemap
+# 🧭 Optional: avoid tag or test pages
+Disallow: /tag/
+Disallow: /tags/
+Disallow: /test/
+
+# 🗺️ Sitemap
 Sitemap: ${baseUrl}/sitemap.xml
 `.trim()
 
