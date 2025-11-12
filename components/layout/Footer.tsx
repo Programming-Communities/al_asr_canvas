@@ -12,6 +12,7 @@ import {
   Shield,
   Users,
   Calendar,
+  BookOpen,
 } from "lucide-react";
 
 const Footer: React.FC = () => {
@@ -144,7 +145,7 @@ const Footer: React.FC = () => {
               </ul>
             </div>
 
-            {/* Services */}
+            {/* Our Services */}
             <div>
               <h4 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-red-400" />
@@ -165,69 +166,88 @@ const Footer: React.FC = () => {
               </ul>
             </div>
 
-            {/* Newsletter & Social */}
+            {/* Other Services Section */}
             <div>
               <h4 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
-                <Shield className="w-5 h-5 text-red-400" />
-                Stay Connected
+                <BookOpen className="w-5 h-5 text-red-400" />
+                Other Services
               </h4>
+              <ul className="space-y-3">
+                <li>
+                  <a
+                    href="/other-services"
+                    className="text-gray-300 hover:text-red-400 transition-colors duration-200 flex items-center gap-2 group"
+                  >
+                    <span className="w-1 h-1 bg-red-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+                    Other Services
+                  </a>
+                </li>
+              </ul>
 
-              {/* Newsletter Signup */}
-              <div className="mb-6">
-                <p className="text-gray-300 text-sm mb-3">
-                  Subscribe to our newsletter for updates
-                </p>
-                <div className="flex gap-2">
-                  <input
-                    type="email"
-                    placeholder="Your email"
-                    className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm"
-                  />
-                  <button className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200 text-sm font-medium">
-                    Subscribe
-                  </button>
+              {/* Newsletter & Social */}
+              <div className="mt-8">
+                <h4 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
+                  <Shield className="w-5 h-5 text-red-400" />
+                  Stay Connected
+                </h4>
+
+                {/* Newsletter Signup */}
+                <div className="mb-6">
+                  <p className="text-gray-300 text-sm mb-3">
+                    Subscribe to our newsletter for updates
+                  </p>
+                  <div className="flex gap-2">
+                    <input
+                      type="email"
+                      placeholder="Your email"
+                      className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm"
+                    />
+                    <button className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200 text-sm font-medium">
+                      Subscribe
+                    </button>
+                  </div>
                 </div>
-              </div>
 
-              {/* Social Media */}
-              <div>
-                <p className="text-gray-300 text-sm mb-3">
-                  Follow us on social media
-                </p>
-                <div className="flex gap-2">
-                  {socialLinks.map((social) => {
-                    const Icon = social.icon;
-                    return (
-                      <a
-                        key={social.label}
-                        href={social.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={`p-2 bg-gray-800 rounded-lg text-gray-300 hover:text-white transition-all duration-200 ${social.color} transform hover:scale-110`}
-                        aria-label={social.label}
-                        title={social.label}
-                      >
-                        <Icon className="w-4 h-4" />
-                      </a>
-                    );
-                  })}
+                {/* Social Media */}
+                <div>
+                  <p className="text-gray-300 text-sm mb-3">
+                    Follow us on social media
+                  </p>
+                  <div className="flex gap-2">
+                    {socialLinks.map((social) => {
+                      const Icon = social.icon;
+                      return (
+                        <a
+                          key={social.label}
+                          href={social.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`p-2 bg-gray-800 rounded-lg text-gray-300 hover:text-white transition-all duration-200 ${social.color} transform hover:scale-110`}
+                          aria-label={social.label}
+                          title={social.label}
+                        >
+                          <Icon className="w-4 h-4" />
+                        </a>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
 
-              {/* Auth Buttons */}
-              <div className="mt-6 flex gap-3">
-                <a
-                  href="/login"
-                  className="flex-1 px-4 py-2 border border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-all duration-200 text-center text-sm font-medium"
-                >
-                  Login
-                </a>
-                <a
-                  href="/signup"
-                  className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all duration-200 text-center text-sm font-medium"
-                >
-                  Sign Up
-                </a>
+                {/* Auth Buttons */}
+                <div className="mt-6 flex gap-3">
+                  <a
+                    href="/login"
+                    className="flex-1 px-4 py-2 border border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-all duration-200 text-center text-sm font-medium"
+                  >
+                    Login
+                  </a>
+                  <a
+                    href="/signup"
+                    className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all duration-200 text-center text-sm font-medium"
+                  >
+                    Sign Up
+                  </a>
+                </div>
               </div>
             </div>
           </div>
@@ -271,10 +291,22 @@ const Footer: React.FC = () => {
                   Terms of Service
                 </a>
                 <a
-                  href="/sitemap.xml"
+                  href="/cookies-policy"
+                  className="text-gray-400 hover:text-red-400 transition-colors whitespace-nowrap"
+                >
+                  Cookies Policy
+                </a>
+                <a
+                  href="/sitemap-page"
                   className="text-gray-400 hover:text-red-400 transition-colors whitespace-nowrap"
                 >
                   Sitemap
+                </a>
+                <a
+                  href="/sitemap.xml"
+                  className="text-gray-400 hover:text-red-400 transition-colors whitespace-nowrap"
+                >
+                  XML Sitemap
                 </a>
               </div>
             </div>
