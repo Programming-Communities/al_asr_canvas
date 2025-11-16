@@ -474,17 +474,26 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onClose }) => {
           )}
         </div>
 
-        {/* Footer - Semi Transparent */}
+        {/* ✅ FIXED: Footer with accessible buttons */}
         <div className="p-4 border-t border-white/30 bg-linear-to-t from-white/20 to-transparent backdrop-blur-2xl">
           <div className="text-center">
             <div className="flex justify-center space-x-3 mb-3">
-              <button className="p-2 bg-white/30 rounded-lg text-white hover:bg-white/40 transition-colors backdrop-blur-sm border border-white/30">
+              <button 
+                className="p-2 bg-white/30 rounded-lg text-white hover:bg-white/40 transition-colors backdrop-blur-sm border border-white/30"
+                aria-label="Download resources"
+              >
                 <Download className="w-4 h-4" />
               </button>
-              <button className="p-2 bg-white/30 rounded-lg text-white hover:bg-white/40 transition-colors backdrop-blur-sm border border-white/30">
+              <button 
+                className="p-2 bg-white/30 rounded-lg text-white hover:bg-white/40 transition-colors backdrop-blur-sm border border-white/30"
+                aria-label="Share this app"
+              >
                 <Share2 className="w-4 h-4" />
               </button>
-              <button className="p-2 bg-white/30 rounded-lg text-white hover:bg-white/40 transition-colors backdrop-blur-sm border border-white/30">
+              <button 
+                className="p-2 bg-white/30 rounded-lg text-white hover:bg-white/40 transition-colors backdrop-blur-sm border border-white/30"
+                aria-label="Bookmark this page"
+              >
                 <Bookmark className="w-4 h-4" />
               </button>
             </div>

@@ -15,13 +15,14 @@
       "last 1 safari version"
     ]
   },
-  "scripts": {
+ "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:clean": "rd /s /q .next && next build",
+    "build:prod": "set NODE_ENV=production&& next build",
     "start": "next start",
     "lint": "next lint",
-    "analyze": "ANALYZE=true next build",
-    "build:prod": "NODE_ENV=production next build"
+    "analyze": "set ANALYZE=true&& next build"
   },
   "dependencies": {
     "@apollo/client": "^4.0.9",
