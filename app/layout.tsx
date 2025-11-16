@@ -7,6 +7,9 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/react";
 import { ApolloWrapper } from "@/lib/apollo-wrapper";
 
+import { CookieProvider } from "@/contexts/CookieContext";
+import CookieConsent from "@/components/shared/CookieConsent";
+
 const inter = Inter({ 
   subsets: ['latin'],
   display: 'swap',
@@ -285,14 +288,17 @@ export default function RootLayout({ children }: RootLayoutProps) {
           <span style={{ fontSize: '18px' }}>📱</span>
           Install App
         </button>
-
-        <ThemeProvider>
-          <ApolloWrapper>
-            <main role="main" id="main-content" tabIndex={-1} className="min-h-screen">
-              {children}
-            </main>
-          </ApolloWrapper>
-        </ThemeProvider>
+     <CookieProvider>
+  <ThemeProvider>
+    <ApolloWrapper>
+      <main role="main" id="main-content" tabIndex={-1} className="min-h-screen">
+        {children}
+      </main>
+    </ApolloWrapper>
+  </ThemeProvider>
+  {/* ✅ Cookie Consent Banner - YEH LINE ADD KAREIN */}
+  <CookieConsent />
+</CookieProvider>
 
         {/* ✅ Analytics - Only in production */}
         {process.env.NODE_ENV === 'production' && (

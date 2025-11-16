@@ -76,7 +76,7 @@ const CategoriesNavbar: React.FC = () => {
           {/* Category Link */}
           <Link
             href={`/categories/${category.slug}`}
-            className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+            className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap min-h-11 ${
               isActive
                 ? 'text-white bg-white/30 backdrop-blur-sm shadow-lg'
                 : 'text-white/90 hover:text-white hover:bg-white/20 backdrop-blur-sm'
@@ -89,6 +89,7 @@ const CategoriesNavbar: React.FC = () => {
                 setOpenCategory(null); // Close menu if no children
               }
             }}
+            aria-label={`Browse ${category.name} category`}
           >
             <span className="flex items-center space-x-2">
               <span className="font-medium">{category.name}</span>
@@ -102,16 +103,19 @@ const CategoriesNavbar: React.FC = () => {
           {hasChildren && (
             <button
               onClick={() => toggleCategoryMenu(category.slug)}
-              className={`p-1 rounded-lg transition-all duration-200 backdrop-blur-sm mx-1 ${
+              className={`p-3 rounded-lg transition-all duration-200 backdrop-blur-sm mx-1 min-h-11 min-w-11 ${
                 isOpen
                   ? 'bg-white/30 text-white'
                   : 'text-white/70 hover:text-white hover:bg-white/20'
               }`}
+              aria-label={`${isOpen ? 'Close' : 'Open'} ${category.name} submenu`}
+              aria-expanded={isOpen}
+              aria-controls={`submenu-${category.slug}`}
             >
               {isOpen ? (
-                <X className="w-3 h-3" />
+                <X className="w-4 h-4" />
               ) : (
-                <ChevronUp className="w-3 h-3" />
+                <ChevronUp className="w-4 h-4" />
               )}
             </button>
           )}
@@ -120,19 +124,22 @@ const CategoriesNavbar: React.FC = () => {
         {/* PERSISTENT Sub-categories DROPUP - Only closes on outside click or X button */}
         {hasChildren && isOpen && (
           <div 
+            id={`submenu-${category.slug}`}
             className={`absolute ${
               level === 0 ? 'bottom-full mb-1' : 'bottom-full mb-1'
             } left-0 bg-white/10 backdrop-blur-2xl rounded-lg border border-white/30 z-50 min-w-48 max-w-64 max-h-80 overflow-hidden shadow-2xl`}
+            role="navigation"
+            aria-label={`${category.name} submenu`}
           >
             {/* Close Button for persistent menu */}
             <div className="flex justify-between items-center p-2 border-b border-white/20 bg-white/5">
               <span className="text-white text-sm font-semibold">{category.name}</span>
               <button
                 onClick={() => setOpenCategory(null)}
-                className="p-1 hover:bg-white/20 rounded transition-colors"
+                className="p-2 hover:bg-white/20 rounded transition-colors min-h-10 min-w-10 flex items-center justify-center"
                 aria-label="Close menu"
               >
-                <X className="w-3 h-3 text-white" />
+                <X className="w-4 h-4 text-white" />
               </button>
             </div>
             
@@ -141,9 +148,9 @@ const CategoriesNavbar: React.FC = () => {
                 ? 'max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-white/40 scrollbar-track-transparent' 
                 : ''
             }`}>
-              <div className="space-y-0.5">
+              <div className="space-y-0.5" role="list">
                 {category.children!.map((child) => (
-                  <div key={child.id}>
+                  <div key={child.id} role="listitem">
                     {renderCategoryItem(child, level + 1)}
                   </div>
                 ))}
@@ -154,8 +161,9 @@ const CategoriesNavbar: React.FC = () => {
             <div className="p-1 border-t border-white/30">
               <Link
                 href={`/categories/${category.slug}`}
-                className="block text-center text-xs font-semibold text-white hover:text-white py-1.5 rounded-md bg-white/15 hover:bg-white/25 border border-white/30 hover:border-white/40 transition-all duration-200"
+                className="flex items-center justify-center text-center text-xs font-semibold text-white hover:text-white py-3 rounded-md bg-white/15 hover:bg-white/25 border border-white/30 hover:border-white/40 transition-all duration-200 min-h-10"
                 onClick={() => setOpenCategory(null)}
+                aria-label={`View all posts in ${category.name}`}
               >
                 View All {category.name}
               </Link>
@@ -170,18 +178,23 @@ const CategoriesNavbar: React.FC = () => {
     <div 
       ref={navbarRef}
       className="categories-navbar hidden md:flex items-center justify-center space-x-0"
+      role="navigation"
+      aria-label="Main categories"
     >
       {/* Home Button - First Position */}
       <Link
         href="/"
-        className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 mx-1 ${
+        className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 mx-1 min-h-11 ${
           isHomeActive
             ? 'text-white bg-white/30 backdrop-blur-sm shadow-lg'
             : 'text-white/90 hover:text-white hover:bg-white/20 backdrop-blur-sm'
         }`}
         onClick={() => setOpenCategory(null)}
+        aria-label="Home page"
+        aria-current={isHomeActive ? 'page' : undefined}
       >
         <Home className="w-4 h-4" />
+        <span className="sr-only">Home</span>
       </Link>
 
       {categoriesLoading ? (
@@ -189,7 +202,8 @@ const CategoriesNavbar: React.FC = () => {
         Array.from({ length: 3 }).map((_, index) => (
           <div
             key={index}
-            className="w-24 h-8 bg-white/20 rounded-lg animate-pulse backdrop-blur-sm mx-1"
+            className="w-24 h-11 bg-white/20 rounded-lg animate-pulse backdrop-blur-sm mx-1"
+            aria-label="Loading categories"
           ></div>
         ))
       ) : categories.length > 0 ? (
@@ -199,7 +213,7 @@ const CategoriesNavbar: React.FC = () => {
           </div>
         ))
       ) : (
-        <div className="text-white/70 text-sm px-3 py-2 backdrop-blur-sm">
+        <div className="text-white/70 text-sm px-3 py-2 backdrop-blur-sm min-h-11 flex items-center">
           No categories found
         </div>
       )}
