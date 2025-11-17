@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // ✅ Image optimizations
+  // ✅ Image optimizations - PERFORMANCE FOCUSED
   images: {
     remotePatterns: [
       {
@@ -9,23 +9,20 @@ const nextConfig = {
       },
     ],
     formats: ['image/webp', 'image/avif'],
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920], // Reduced from 8 to 6
+    imageSizes: [16, 32, 64, 96, 128, 256], // Reduced from 8 to 6
     minimumCacheTTL: 3600,
     dangerouslyAllowSVG: true,
-    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
 
   // ✅ Compiler optimizations
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
-    reactRemoveProperties: process.env.NODE_ENV === 'production',
   },
 
   // ✅ Performance optimizations
   poweredByHeader: false,
   compress: true,
-  generateEtags: false,
 
   // ✅ Security headers
   async headers() {
@@ -44,10 +41,6 @@ const nextConfig = {
           {
             key: 'X-XSS-Protection',
             value: '1; mode=block'
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin'
           }
         ],
       },
@@ -66,17 +59,8 @@ const nextConfig = {
   // ✅ Experimental optimizations
   experimental: {
     optimizeCss: true,
-    optimizePackageImports: ['lucide-react', 'react-icons'],
-    scrollRestoration: true,
-  },
+    optimizePackageImports: ['lucide-react'],
+  }
 }
 
-// Bundle analyzer (optional)
-if (process.env.ANALYZE === 'true') {
-  const withBundleAnalyzer = require('@next/bundle-analyzer')({
-    enabled: true,
-  })
-  module.exports = withBundleAnalyzer(nextConfig)
-} else {
-  module.exports = nextConfig
-}
+module.exports = nextConfig

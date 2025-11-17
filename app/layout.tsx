@@ -88,7 +88,13 @@ export default function RootLayout({ children }: RootLayoutProps) {
       data-scroll-behavior="smooth"
     >
       <head>
-        {/* ✅ PWA Meta Tags */}
+        {/* ✅ PERFORMANCE OPTIMIZATIONS - ADD THESE LINES */}
+        <link rel="dns-prefetch" href="https://al-asr.centers.pk" />
+        <link rel="preconnect" href="https://al-asr.centers.pk" />
+        <link rel="dns-prefetch" href="https://admin-al-asr.centers.pk" />
+        <link rel="preconnect" href="https://admin-al-asr.centers.pk" crossOrigin="anonymous" />
+        
+        {/* ✅ YOUR EXISTING META TAGS - KEEP AS IS */}
         <meta name="application-name" content="Al-Asr Islamic Service" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -101,12 +107,6 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <meta name="theme-color" content="#991b1b" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
         
-        {/* ✅ Performance Optimizations */}
-        <link rel="dns-prefetch" href="https://admin-al-asr.centers.pk" />
-        <link rel="preconnect" href="https://admin-al-asr.centers.pk" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        
         {/* ✅ Apple Touch Icons */}
         <link rel="apple-touch-icon" href="/ios/180.png" />
         <link rel="apple-touch-icon" sizes="152x152" href="/ios/152.png" />
@@ -116,7 +116,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         {/* ✅ PWA Manifest */}
         <link rel="manifest" href="/manifest.json" />
         
-        {/* ✅ Fixed: Viewport meta */}
+        {/* ✅ Viewport meta */}
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/android/android-launchericon-48-48.png" />
 
@@ -138,11 +138,11 @@ export default function RootLayout({ children }: RootLayoutProps) {
         {/* ✅ Prevent dark-mode filter */}
         <meta name="darkreader-lock" />
 
-        {/* ✅ Critical CSS Inline - Optimized */}
+        {/* ✅ CRITICAL CSS - PERFORMANCE OPTIMIZED */}
         <style
           dangerouslySetInnerHTML={{
             __html: `
-              /*! Critical Above-the-Fold CSS - Optimized */
+              /*! Critical Above-the-Fold CSS - Optimized for LCP */
               :root {
                 --background: #ffffff;
                 --foreground: #171717;
@@ -174,6 +174,12 @@ export default function RootLayout({ children }: RootLayoutProps) {
                 line-height: 1.6;
                 overflow-x: hidden;
                 min-height: 100vh;
+              }
+              
+              /* LCP Optimization */
+              .lcp-optimize {
+                content-visibility: auto;
+                contain-intrinsic-size: 400px;
               }
               
               /* Header Critical Styles */
@@ -288,17 +294,24 @@ export default function RootLayout({ children }: RootLayoutProps) {
           <span style={{ fontSize: '18px' }}>📱</span>
           Install App
         </button>
-     <CookieProvider>
-  <ThemeProvider>
-    <ApolloWrapper>
-      <main role="main" id="main-content" tabIndex={-1} className="min-h-screen">
-        {children}
-      </main>
-    </ApolloWrapper>
-  </ThemeProvider>
-  {/* ✅ Cookie Consent Banner - YEH LINE ADD KAREIN */}
-  <CookieConsent />
-</CookieProvider>
+
+        <CookieProvider>
+          <ThemeProvider>
+            <ApolloWrapper>
+              {/* ✅ LCP OPTIMIZATION - Added lcp-optimize class */}
+              <main 
+                role="main" 
+                id="main-content" 
+                tabIndex={-1} 
+                className="min-h-screen lcp-optimize"
+              >
+                {children}
+              </main>
+            </ApolloWrapper>
+          </ThemeProvider>
+          {/* ✅ Cookie Consent Banner */}
+          <CookieConsent />
+        </CookieProvider>
 
         {/* ✅ Analytics - Only in production */}
         {process.env.NODE_ENV === 'production' && (
@@ -308,7 +321,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
           </>
         )}
 
-        {/* ✅ PWA Script - FIXED & IMPROVED */}
+        {/* ✅ PERFORMANCE OPTIMIZED PWA SCRIPT */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -319,27 +332,17 @@ export default function RootLayout({ children }: RootLayoutProps) {
                 function initializePWA() {
                   installButton = document.getElementById('install-button');
                   
-                  if (!installButton) {
-                    console.error('Install button element not found');
-                    return;
-                  }
+                  if (!installButton) return;
 
                   // Install button click handler
                   installButton.addEventListener('click', async function() {
-                    console.log('Install button clicked');
-                    
                     if (deferredPrompt) {
                       try {
                         deferredPrompt.prompt();
                         const choiceResult = await deferredPrompt.userChoice;
                         
-                        console.log('User choice:', choiceResult.outcome);
-                        
                         if (choiceResult.outcome === 'accepted') {
-                          console.log('User accepted the install prompt');
                           hideInstallButton();
-                        } else {
-                          console.log('User dismissed the install prompt');
                         }
                         
                         deferredPrompt = null;
@@ -351,70 +354,58 @@ export default function RootLayout({ children }: RootLayoutProps) {
 
                   // Check if already installed
                   if (isPWAInstalled()) {
-                    console.log('App is already installed');
                     hideInstallButton();
                     return;
                   }
-
-                  console.log('PWA initialization complete');
                 }
 
                 // Before install prompt event
                 window.addEventListener('beforeinstallprompt', function(e) {
-                  console.log('beforeinstallprompt event fired');
                   e.preventDefault();
                   deferredPrompt = e;
                   
                   // Show install button after a short delay
                   setTimeout(function() {
-                    if (!isPWAInstalled() && deferredPrompt) {
-                      showInstallButton();
+                    if (!isPWAInstalled() && deferredPrompt && installButton) {
+                      installButton.style.display = 'flex';
+                      
+                      // Auto-hide after 15 seconds
+                      setTimeout(function() {
+                        if (installButton.style.display !== 'none') {
+                          hideInstallButton();
+                        }
+                      }, 15000);
                     }
                   }, 2000);
                 });
 
                 // After app is installed
                 window.addEventListener('appinstalled', function(evt) {
-                  console.log('PWA was successfully installed');
                   hideInstallButton();
                   deferredPrompt = null;
                 });
 
-                // Page load event
+                // Page load event - OPTIMIZED FOR LCP
                 window.addEventListener('load', function() {
-                  console.log('Page loaded, initializing PWA...');
                   initializePWA();
                   
-                  // Service Worker Registration
-                  if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.register('/sw.js')
-                      .then(function(registration) {
-                        console.log('SW registered: ', registration);
-                      })
-                      .catch(function(registrationError) {
-                        console.log('SW registration failed: ', registrationError);
-                      });
-                  }
+                  // Service Worker Registration - DEFERRED FOR LCP
+                  setTimeout(function() {
+                    if ('serviceWorker' in navigator) {
+                      navigator.serviceWorker.register('/sw.js')
+                        .then(function(registration) {
+                          console.log('SW registered: ', registration);
+                        })
+                        .catch(function(registrationError) {
+                          console.log('SW registration failed: ', registrationError);
+                        });
+                    }
+                  }, 1000);
                 });
-
-                function showInstallButton() {
-                  if (installButton && !isPWAInstalled()) {
-                    installButton.style.display = 'flex';
-                    console.log('Showing install button');
-                    
-                    // Auto-hide after 15 seconds
-                    setTimeout(function() {
-                      if (installButton.style.display !== 'none') {
-                        hideInstallButton();
-                      }
-                    }, 15000);
-                  }
-                }
 
                 function hideInstallButton() {
                   if (installButton) {
                     installButton.style.display = 'none';
-                    console.log('Hiding install button');
                   }
                 }
 
@@ -423,11 +414,28 @@ export default function RootLayout({ children }: RootLayoutProps) {
                          window.navigator.standalone === true;
                 }
 
+                // LCP Optimization - Preload critical image
+                function optimizeLCP() {
+                  const lcpCandidate = document.querySelector('img[loading="eager"]');
+                  if (lcpCandidate && 'fetch' in window) {
+                    // Preload LCP image
+                    const link = document.createElement('link');
+                    link.rel = 'preload';
+                    link.as = 'image';
+                    link.href = lcpCandidate.src;
+                    document.head.appendChild(link);
+                  }
+                }
+
                 // Initialize when DOM is ready
                 if (document.readyState === 'loading') {
-                  document.addEventListener('DOMContentLoaded', initializePWA);
+                  document.addEventListener('DOMContentLoaded', function() {
+                    initializePWA();
+                    optimizeLCP();
+                  });
                 } else {
                   initializePWA();
+                  optimizeLCP();
                 }
               })();
             `,
