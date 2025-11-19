@@ -1,48 +1,60 @@
 import { gql } from '@apollo/client';
 import { Post, Category } from '@/types/blog';
 
-// Server-side fetch function
+// Server-side fetch function with better error handling
 async function fetchGraphQL(query: string, variables?: any) {
-  try {
-    const response = await fetch(
-      process.env.NEXT_PUBLIC_WORDPRESS_API_URL || 'https://admin-al-asr.centers.pk/graphql',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query,
-          variables,
-        }),
-        next: { revalidate: 60 }
-      }
-    );
+  const WORDPRESS_API_URL = process.env.NEXT_PUBLIC_WORDPRESS_API_URL;
+  
+  if (!WORDPRESS_API_URL) {
+    throw new Error('NEXT_PUBLIC_WORDPRESS_API_URL environment variable is not set');
+  }
 
+  console.log('🔍 Fetching from WordPress:', WORDPRESS_API_URL);
+  
+  try {
+    const response = await fetch(WORDPRESS_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query,
+        variables,
+      }),
+      next: { revalidate: 60 }
+    });
+
+    console.log('📊 Response Status:', response.status);
+    
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorText = await response.text();
+      console.error('❌ WordPress Error Response:', errorText);
+      throw new Error(`WordPress GraphQL Error: ${response.status} - ${response.statusText}`);
     }
 
     const result = await response.json();
     
     if (result.errors) {
-      console.error('GraphQL Errors:', result.errors);
-      throw new Error('GraphQL query failed');
+      console.error('❌ GraphQL Query Errors:', result.errors);
+      throw new Error('GraphQL query failed: ' + JSON.stringify(result.errors));
     }
 
+    console.log('✅ GraphQL Query Successful');
     return result.data;
   } catch (error) {
-    console.error('Fetch error:', error);
+    console.error('💥 Fetch error:', error);
     throw error;
   }
 }
 
-// ✅ GET ALL POSTS FUNCTION
+// ✅ GET ALL POSTS FUNCTION - CLEAN GRAPHQL QUERY
 export async function getPosts(): Promise<Post[]> {
   try {
+    console.log('📝 Fetching posts from WordPress...');
+    
     const data = await fetchGraphQL(`
       query GetPosts {
-        posts {
+        posts(first: 100) {
           nodes {
             id
             title
@@ -72,14 +84,12 @@ export async function getPosts(): Promise<Post[]> {
       }
     `);
 
-    if (!data?.posts?.nodes) {
-      console.warn('No posts data found in response');
-      return [];
-    }
-
-    return data.posts.nodes;
+    const posts = data?.posts?.nodes || [];
+    console.log(`✅ Retrieved ${posts.length} posts from WordPress`);
+    
+    return posts;
   } catch (error) {
-    console.error('Error fetching posts:', error);
+    console.error('❌ Error fetching posts:', error);
     return [];
   }
 }
@@ -116,29 +126,27 @@ export async function getPost(slug: string): Promise<Post | null> {
       }
     `, { slug });
 
-    if (!data?.post) {
-      console.warn(`No post found for slug: ${slug}`);
-      return null;
-    }
-
-    return data.post;
+    return data?.post || null;
   } catch (error) {
     console.error('Error fetching post:', error);
     return null;
   }
 }
 
-// ✅ GET ALL CATEGORIES WITH HIERARCHY
+// ✅ GET ALL CATEGORIES FUNCTION - CLEAN GRAPHQL QUERY
 export async function getAllCategories(): Promise<Category[]> {
   try {
+    console.log('📂 Fetching categories from WordPress...');
+    
     const data = await fetchGraphQL(`
-      query GetCategories {
-        categories(first: 100, where: {hideEmpty: false}) {
+      query GetAllCategories {
+        categories(first: 50, where: {hideEmpty: true}) {
           nodes {
             id
             slug
             name
             count
+            description
             parent {
               node {
                 id
@@ -151,18 +159,12 @@ export async function getAllCategories(): Promise<Category[]> {
       }
     `);
 
-    if (!data?.categories?.nodes) {
-      console.warn('No categories data found in response');
-      return [];
-    }
-
-    // Organize categories with hierarchy
-    const allCategories = data.categories.nodes;
-    const categoriesWithHierarchy = organizeCategoriesHierarchy(allCategories);
+    const categories = data?.categories?.nodes || [];
+    console.log(`✅ Retrieved ${categories.length} categories from WordPress`);
     
-    return categoriesWithHierarchy;
+    return organizeCategoriesHierarchy(categories);
   } catch (error) {
-    console.error('Error fetching categories:', error);
+    console.error('❌ Error fetching categories:', error);
     return [];
   }
 }
@@ -172,13 +174,13 @@ function organizeCategoriesHierarchy(categories: any[]): Category[] {
   const categoryMap = new Map();
   const rootCategories: Category[] = [];
 
-  // First pass: create map of all categories
   categories.forEach(category => {
     const categoryData: Category = {
       id: category.id,
       slug: category.slug,
       name: category.name,
       count: category.count || 0,
+      description: category.description || '',
       parentId: category.parent?.node?.id || null,
       children: []
     };
@@ -186,19 +188,16 @@ function organizeCategoriesHierarchy(categories: any[]): Category[] {
     categoryMap.set(category.id, categoryData);
   });
 
-  // Second pass: build hierarchy
   categories.forEach(category => {
     const categoryData = categoryMap.get(category.id);
     
     if (category.parent?.node) {
-      // This is a child category
       const parentCategory = categoryMap.get(category.parent.node.id);
       if (parentCategory) {
         parentCategory.children = parentCategory.children || [];
         parentCategory.children.push(categoryData);
       }
     } else {
-      // This is a root category (no parent)
       rootCategories.push(categoryData);
     }
   });
@@ -206,17 +205,15 @@ function organizeCategoriesHierarchy(categories: any[]): Category[] {
   return rootCategories;
 }
 
-// ✅ SIMPLE: Get posts by category using filtering (No GraphQL errors)
+// ✅ GET POSTS BY CATEGORY
 export async function getPostsByCategory(categorySlug: string): Promise<Post[]> {
   try {
-    // Get all posts and filter by category
     const allPosts = await getPosts();
-    
     const filteredPosts = allPosts.filter(post => 
       post.categories?.nodes?.some((cat: any) => cat.slug === categorySlug)
     );
 
-    console.log(`Found ${filteredPosts.length} posts for category: ${categorySlug}`);
+    console.log(`✅ Found ${filteredPosts.length} posts for category: ${categorySlug}`);
     return filteredPosts;
   } catch (error) {
     console.error('Error in getPostsByCategory:', error);
@@ -224,7 +221,7 @@ export async function getPostsByCategory(categorySlug: string): Promise<Post[]> 
   }
 }
 
-// ✅ GET ALL POSTS FOR CATEGORIES PAGE
+// ✅ GET ALL POSTS (alias for getPosts)
 export async function getAllPosts(): Promise<Post[]> {
   return await getPosts();
 }

@@ -2,7 +2,7 @@
 import React from 'react';
 import Header from './Header';
 import Footer from './Footer';
-import CategoriesTab from './CategoriesTab'; // ✅ YEH IMPORT KARO
+
 
 
 interface LayoutProps {

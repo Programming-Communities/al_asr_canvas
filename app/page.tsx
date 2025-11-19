@@ -1,17 +1,17 @@
 import BlogList from "@/components/blog/BlogList";
 import Layout from "@/components/layout/Layout";
 import { getPosts } from '@/lib/wordpress';
-import { Post } from '@/types/blog';
 
 // Server component for SSR
 export default async function Home() {
-  // Fetch initial posts on server for SSR
   const initialPosts = await getPosts();
-  
+
   return (
     <Layout>
-      {/* Fixed: Remove initialPosts prop since BlogList doesn't accept it */}
-      <BlogList />
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-8 text-center"></h1>
+        <BlogList initialPosts={initialPosts} />
+      </div>
     </Layout>
   );
 }

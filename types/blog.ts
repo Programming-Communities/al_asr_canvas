@@ -1,17 +1,13 @@
+// types/blog.ts
+
 export interface Category {
   id: string;
   slug: string;
   name: string;
-  count?: number;
-  parentId?: string | null;
-  children?: Category[];
-}
-
-export interface FeaturedImage {
-  node: {
-    sourceUrl: string;
-    altText: string;
-  };
+  count: number;
+  description?: string;
+  parentId: string | null;
+  children: Category[];
 }
 
 export interface Post {
@@ -21,19 +17,45 @@ export interface Post {
   excerpt: string;
   date: string;
   slug: string;
-  featuredImage?: FeaturedImage;
-  categories: {
-    nodes: Category[];
+  featuredImage?: {
+    node: {
+      sourceUrl: string;
+      altText: string;
+      mediaDetails?: {
+        width: number;
+        height: number;
+      };
+    };
   };
-  author: {
+  categories?: {
+    nodes: Array<{
+      slug: string;
+      name: string;
+      description?: string;
+    }>;
+  };
+  author?: {
     node: {
       name: string;
     };
   };
 }
 
-export interface BlogListProps {
-  showTitle?: boolean;
-  currentPostSlug?: string | null;
-  initialPosts?: Post[];
+export interface BlogListResponse {
+  posts: {
+    nodes: Post[];
+    pageInfo: {
+      hasNextPage: boolean;
+      endCursor: string;
+    };
+  };
+}
+
+export interface SearchFilters {
+  category?: string;
+  tag?: string;
+  author?: string;
+  date?: string;
+  sortBy?: 'date' | 'title' | 'modified';
+  sortOrder?: 'ASC' | 'DESC';
 }
