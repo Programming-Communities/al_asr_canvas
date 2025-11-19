@@ -17,8 +17,8 @@ const Logo: React.FC = () => {
           <Image
             src="/logo.webp"
             alt="Al-Asr (Islamic Service)"
-            width={160}
-            height={60}
+            width={100}
+            height={50}
             className="cursor-pointer hover:opacity-90 transition-opacity w-full h-full object-contain" // Fixed
             priority
             style={{ 

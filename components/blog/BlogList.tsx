@@ -1,9 +1,10 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import BlogItem from './BlogItem';
 import { BlogItemSkeleton } from '../skeleton/BlogItemSkeleton';
 import { getPosts, getAllCategories } from '@/lib/wordpress';
 import { Post, Category } from '@/types/blog';
+import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 
 interface BlogListProps {
   showTitle?: boolean;
@@ -17,12 +18,14 @@ const BlogList: React.FC<BlogListProps> = ({
   initialPosts = []
 }) => {
   const [posts, setPosts] = useState<Post[]>(initialPosts);
-  const [filteredPosts, setFilteredPosts] = useState<Post[]>(initialPosts);
+  const [displayedPosts, setDisplayedPosts] = useState<Post[]>(initialPosts.slice(0, 12)); // Start with 12 posts
   const [categories, setCategories] = useState<Category[]>([]);
   const [activeCategory, setActiveCategory] = useState('all');
   const [loading, setLoading] = useState(!initialPosts.length);
   const [error, setError] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
+  const [page, setPage] = useState(1);
+  const postsPerPage = 12;
 
   // Fix hydration by tracking client-side rendering
   useEffect(() => {
@@ -30,17 +33,12 @@ const BlogList: React.FC<BlogListProps> = ({
   }, []);
 
   useEffect(() => {
-    console.log('📂 Categories state updated:', categories.length, categories);
-  }, [categories]);
-
-  useEffect(() => {
     if (initialPosts.length === 0) {
       fetchInitialData();
     } else {
       setPosts(initialPosts);
-      setFilteredPosts(initialPosts);
+      setDisplayedPosts(initialPosts.slice(0, postsPerPage));
       setLoading(false);
-      // Also fetch categories even if we have initial posts
       fetchCategories();
     }
   }, [initialPosts]);
@@ -60,24 +58,43 @@ const BlogList: React.FC<BlogListProps> = ({
       filtered = filtered.filter(post => post.slug !== currentPostSlug);
     }
 
-    setFilteredPosts(filtered);
+    setDisplayedPosts(filtered.slice(0, postsPerPage));
+    setPage(1);
   }, [activeCategory, posts, currentPostSlug]);
+
+  // Infinite Scroll Load More
+  const loadMorePosts = useCallback(async () => {
+    if (loading) return;
+
+    const startIndex = page * postsPerPage;
+    const endIndex = startIndex + postsPerPage;
+    
+    let filtered = posts;
+    if (activeCategory !== 'all') {
+      filtered = posts.filter(post =>
+        post.categories?.nodes?.some((cat: Category) => cat.slug === activeCategory)
+      );
+    }
+
+    const newPosts = filtered.slice(startIndex, endIndex);
+    
+    if (newPosts.length > 0) {
+      setDisplayedPosts(prev => [...prev, ...newPosts]);
+      setPage(prev => prev + 1);
+    }
+  }, [page, posts, activeCategory, loading]);
+
+  const { isLoading: loadingMore } = useInfiniteScroll(loadMorePosts, displayedPosts.length < posts.length);
 
   const fetchCategories = async () => {
     try {
-      console.log('🔄 Fetching categories...');
       const categoriesData = await getAllCategories();
-      console.log('📂 Categories fetched:', categoriesData?.length, categoriesData);
       if (categoriesData && categoriesData.length > 0) {
         setCategories(categoriesData);
       } else {
-        console.warn('⚠️ No categories found, trying to extract from posts...');
-        // If no categories from API, extract from posts
         extractCategoriesFromPosts();
       }
     } catch (err) {
-      console.error('❌ Error fetching categories:', err);
-      // If categories fail, extract from posts
       extractCategoriesFromPosts();
     }
   };
@@ -100,8 +117,6 @@ const BlogList: React.FC<BlogListProps> = ({
     });
 
     const extractedCategories = Array.from(categoryMap.values());
-    console.log('📝 Extracted categories from posts:', extractedCategories);
-    
     if (extractedCategories.length > 0) {
       setCategories(extractedCategories);
     }
@@ -117,30 +132,27 @@ const BlogList: React.FC<BlogListProps> = ({
         getAllCategories()
       ]);
 
-      console.log('📦 Posts data:', postsData?.length);
-      console.log('📦 Categories data:', categoriesData?.length, categoriesData);
-
       setPosts(postsData);
-
-      let initialFiltered = postsData;
-      if (currentPostSlug) {
-        initialFiltered = postsData.filter(post => post.slug !== currentPostSlug);
-      }
-      setFilteredPosts(initialFiltered);
+      setDisplayedPosts(postsData.slice(0, postsPerPage));
 
       if (categoriesData && categoriesData.length > 0) {
         setCategories(categoriesData);
       } else {
-        console.warn('⚠️ No categories from API, extracting from posts...');
         extractCategoriesFromPosts();
       }
     } catch (err) {
-      console.error('Error:', err);
       setError('Failed to load content');
     } finally {
       setLoading(false);
     }
   };
+
+  // Auto-update categories when new posts arrive
+  useEffect(() => {
+    if (posts.length > 0 && categories.length === 0) {
+      extractCategoriesFromPosts();
+    }
+  }, [posts, categories]);
 
   if (error) {
     return (
@@ -175,12 +187,10 @@ const BlogList: React.FC<BlogListProps> = ({
         </div>
       )}
 
-     
-
-      {/* Category Filters - ALWAYS SHOW with All Posts button */}
+      {/* Category Filters */}
       {isClient && (
         <div className="flex justify-start gap-2 my-8 overflow-x-auto pb-2 scrollbar-hide">
-          {/* All Posts Button - ALWAYS SHOW */}
+          {/* All Posts Button */}
           <button
             onClick={() => setActiveCategory('all')}
             className={`px-4 py-2 rounded-full transition-all text-sm whitespace-nowrap ${
@@ -192,36 +202,30 @@ const BlogList: React.FC<BlogListProps> = ({
             All Posts
           </button>
           
-          {/* Category Buttons - Show if we have categories */}
-          {categories.length > 0 ? (
-            categories.map((category) => (
-              <button
-                key={category.slug}
-                onClick={() => setActiveCategory(category.slug)}
-                className={`px-4 py-2 rounded-full transition-all text-sm whitespace-nowrap ${
-                  activeCategory === category.slug
-                    ? 'bg-red-600 text-white shadow-lg'
-                    : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-                }`}
-              >
-                {category.name} {category.count ? `(${category.count})` : ''}
-              </button>
-            ))
-          ) : (
-            <div className="text-gray-500 text-sm italic">
-              No categories available
-            </div>
-          )}
+          {/* Dynamic Category Buttons */}
+          {categories.map((category) => (
+            <button
+              key={category.slug}
+              onClick={() => setActiveCategory(category.slug)}
+              className={`px-4 py-2 rounded-full transition-all text-sm whitespace-nowrap ${
+                activeCategory === category.slug
+                  ? 'bg-red-600 text-white shadow-lg'
+                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+              }`}
+            >
+              {category.name}
+            </button>
+          ))}
         </div>
       )}
 
-      {/* Show active category info */}
+      {/* Active Category Info */}
       {isClient && activeCategory !== 'all' && (
         <div className="text-center mb-6">
           <div className="inline-flex items-center gap-2 bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-200 px-4 py-2 rounded-full">
             <span>📁</span>
             <span className="font-medium">
-              Showing posts from: {categories.find(c => c.slug === activeCategory)?.name}
+              {categories.find(c => c.slug === activeCategory)?.name}
             </span>
             <button
               onClick={() => setActiveCategory('all')}
@@ -240,27 +244,44 @@ const BlogList: React.FC<BlogListProps> = ({
             <BlogItemSkeleton key={item} />
           ))}
         </div>
-      ) : filteredPosts.length > 0 ? (
+      ) : displayedPosts.length > 0 ? (
         <>
           {/* Results count */}
           {isClient && (
             <div className="text-center mb-6 text-gray-600 dark:text-gray-400">
-              Showing {filteredPosts.length} of {posts.length} posts
+              Showing {displayedPosts.length} of {posts.length} posts
               {activeCategory !== 'all' && (
                 <span> in {categories.find(c => c.slug === activeCategory)?.name}</span>
               )}
             </div>
           )}
           
-          <div className='grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 mb-16'>
-            {filteredPosts.slice(0, 100).map((post, index) => (
+          <div className='grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 mb-8'>
+            {displayedPosts.map((post, index) => (
               <BlogItem
-                key={post.id}
+                key={`${post.id}-${index}`}
                 {...post}
                 index={index}
               />
             ))}
           </div>
+
+          {/* Loading More Indicator */}
+          {loadingMore && (
+            <div className="text-center py-8">
+              <div className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                <div className="w-5 h-5 border-2 border-gray-300 border-t-red-600 rounded-full animate-spin"></div>
+                Loading more posts...
+              </div>
+            </div>
+          )}
+
+          {/* End of Results */}
+          {displayedPosts.length >= posts.length && posts.length > 0 && (
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+              🎉 You've seen all posts!
+            </div>
+          )}
         </>
       ) : (
         <div className="text-center py-16">
@@ -274,14 +295,6 @@ const BlogList: React.FC<BlogListProps> = ({
               : `No posts found in "${categories.find(c => c.slug === activeCategory)?.name}" category.`
             }
           </p>
-          {activeCategory !== 'all' && (
-            <button
-              onClick={() => setActiveCategory('all')}
-              className="mt-4 bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors"
-            >
-              View All Posts
-            </button>
-          )}
         </div>
       )}
     </div>

@@ -13,6 +13,7 @@ const nextConfig = {
     imageSizes: [16, 32, 64, 96, 128, 256], // Reduced from 8 to 6
     minimumCacheTTL: 3600,
     dangerouslyAllowSVG: true,
+    qualities: [65, 75, 90], // ✅ ADD THIS LINE - Fixes the quality warning
   },
 
   // ✅ Compiler optimizations
