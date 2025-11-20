@@ -30,9 +30,14 @@ import {
 interface SidebarMenuProps {
   isOpen: boolean;
   onClose: () => void;
+  id?: string; // ✅ Optional id prop add karein
 }
 
-const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onClose }) => {
+const SidebarMenu: React.FC<SidebarMenuProps> = ({ 
+  isOpen, 
+  onClose, 
+  id = "sidebar-menu" // ✅ Default value
+}) => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [recentPosts, setRecentPosts] = useState<Post[]>([]);
   const [popularPosts, setPopularPosts] = useState<Post[]>([]);
@@ -148,6 +153,7 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onClose }) => {
 
       {/* ✅ COMPLETELY TRANSPARENT SIDEBAR - Website Fully Visible */}
       <div 
+        id={id} // ✅ ID prop applied here
         className={`fixed top-0 right-0 h-full w-80 bg-white/10 dark:bg-gray-900/10 backdrop-blur-3xl shadow-2xl transform transition-transform duration-500 z-50 flex flex-col border-l border-white/30 ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
