@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import SocialShareButtons from '../shared/SocialShareButtons';
 import { Post } from '@/types/blog';
+import { CardLoader } from '../shared/CardLoader'; // ✅ ADD THIS IMPORT
 
 interface BlogItemProps extends Post {
   index?: number;
@@ -29,6 +30,7 @@ const BlogItem: React.FC<BlogItemProps> = ({
   const [showSocialMenu, setShowSocialMenu] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [isCardLoading, setIsCardLoading] = useState(false); // ✅ ADD CARD LOADING STATE
   
   const socialMenuRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -63,11 +65,16 @@ const BlogItem: React.FC<BlogItemProps> = ({
     }
   }, [date]);
 
-  // ✅ Simplified navigation handler
+  // ✅ UPDATED: Navigation handler with CARD loading
   const handleNavigation = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    router.push(`/posts/${slug}`);
+    setIsCardLoading(true); // ✅ SHOW CARD LOADER
+    
+    // Navigate after a small delay to show loader
+    setTimeout(() => {
+      router.push(`/posts/${slug}`);
+    }, 100);
   }, [router, slug]);
 
   const handleShareClick = useCallback((e: React.MouseEvent) => {
@@ -86,7 +93,7 @@ const BlogItem: React.FC<BlogItemProps> = ({
       ([entry]) => {
         if (entry.isIntersecting) {
           setIsVisible(true);
-          observer.disconnect(); // Disconnect after first appearance
+          observer.disconnect();
         }
       },
       { threshold: 0.1, rootMargin: '50px' }
@@ -141,6 +148,9 @@ const BlogItem: React.FC<BlogItemProps> = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
+      {/* ✅ CARD LOADER - Shows on card click */}
+      {isCardLoading && <CardLoader size="md" />}
+
       {/* Image Container - Optimized */}
       <div className="relative h-48 w-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
         <div 
@@ -250,7 +260,7 @@ const BlogItem: React.FC<BlogItemProps> = ({
               aria-label="Share this post"
             >
               <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 00-5.368-2.684z" />
               </svg>
             </button>
 

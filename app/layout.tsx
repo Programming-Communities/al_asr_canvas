@@ -10,6 +10,8 @@ import { ApolloWrapper } from "@/lib/apollo-wrapper";
 import { CookieProvider } from "@/contexts/CookieContext";
 import CookieConsent from "@/components/shared/CookieConsent";
 
+
+
 const inter = Inter({ 
   subsets: ['latin'],
   display: 'swap',
@@ -277,6 +279,42 @@ export default function RootLayout({ children }: RootLayoutProps) {
                   font-size: 15px;
                 }
               }
+
+              /* Global Loader Styles */
+              .global-loader {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.7);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 9999;
+                backdrop-filter: blur(8px);
+              }
+
+              .loader-spinner {
+                width: 48px;
+                height: 48px;
+                border: 4px solid rgba(255, 255, 255, 0.3);
+                border-top: 4px solid #ffffff;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+              }
+
+              @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+              }
+
+              .loader-text {
+                color: white;
+                margin-top: 16px;
+                font-size: 14px;
+                font-weight: 500;
+              }
             `,
           }}
         />
@@ -296,23 +334,26 @@ export default function RootLayout({ children }: RootLayoutProps) {
           Install App
         </button>
 
-        <CookieProvider>
-          <ThemeProvider>
-            <ApolloWrapper>
-              {/* ✅ LCP OPTIMIZATION - Added lcp-optimize class */}
-              <main 
-                role="main" 
-                id="main-content" 
-                tabIndex={-1} 
-                className="min-h-screen lcp-optimize"
-              >
-                {children}
-              </main>
-            </ApolloWrapper>
-          </ThemeProvider>
-          {/* ✅ Cookie Consent Banner */}
-          <CookieConsent />
-        </CookieProvider>
+       
+
+          <CookieProvider>
+            <ThemeProvider>
+              <ApolloWrapper>
+                {/* ✅ LCP OPTIMIZATION - Added lcp-optimize class */}
+                <main 
+                  role="main" 
+                  id="main-content" 
+                  tabIndex={-1} 
+                  className="min-h-screen lcp-optimize"
+                >
+                  {children}
+                </main>
+              </ApolloWrapper>
+            </ThemeProvider>
+            {/* ✅ Cookie Consent Banner */}
+            <CookieConsent />
+          </CookieProvider>
+   
 
         {/* ✅ Analytics - Only in production */}
         {process.env.NODE_ENV === 'production' && (
@@ -454,6 +495,17 @@ export default function RootLayout({ children }: RootLayoutProps) {
                   this.media = 'all';
                 };
               }
+
+              // Enhanced loading state management
+              document.addEventListener('DOMContentLoaded', function() {
+                // Hide any lingering loaders when page is fully loaded
+                setTimeout(function() {
+                  const loaders = document.querySelectorAll('[data-loader]');
+                  loaders.forEach(loader => {
+                    loader.style.display = 'none';
+                  });
+                }, 1000);
+              });
             `,
           }}
         />
