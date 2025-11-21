@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     siteName: "Al-Asr Islamic Service",
     images: [
       {
-        url: OG_IMAGE_URL, // ✅ FIXED: Absolute URL
+        url: OG_IMAGE_URL,
         width: 1200,
         height: 630,
         alt: "Al-Asr Islamic Service",
@@ -55,7 +55,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Al-Asr ( Islamic Service )",
     description: "Islamic Services, Calendar Events, and Community Programs",
-    images: [OG_IMAGE_URL], // ✅ FIXED: Absolute URL
+    images: [OG_IMAGE_URL],
   },
   robots: { index: true, follow: true },
   alternates: { canonical: SITE_URL },

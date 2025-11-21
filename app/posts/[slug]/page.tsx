@@ -39,7 +39,7 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
   );
 }
 
-// ✅ FIXED: Generate metadata for SEO with modified property
+// ✅ FIXED: Generate dynamic metadata for each post with proper OG images
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const post = await getPost(slug);
@@ -57,7 +57,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
                       post.content?.replace(/<[^>]*>/g, '').substring(0, 160) + '...' ||
                       'Islamic services and community programs from Al-Asr ( Islamic Service )';
 
-  // ✅ FIXED: Use absolute URL for images
+  // ✅ FIXED: Use absolute URL for post-specific images
   const imageUrl = post.featuredImage?.node?.sourceUrl 
     ? post.featuredImage.node.sourceUrl
     : `${SITE_URL}/og-image.png`;
@@ -81,11 +81,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
           width: 1200,
           height: 630,
           alt: post.featuredImage?.node?.altText || post.title,
+          type: 'image/jpeg',
         },
       ],
       type: 'article',
       publishedTime: post.date,
-      modifiedTime: post.modified, // ✅ NOW WORKS: modified property exists
+      modifiedTime: post.modified,
       authors: [post.author?.node?.name || 'Al-Asr ( Islamic Service )'],
       locale: 'ur_PK',
     },
@@ -107,6 +108,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         'max-snippet': -1,
       },
     },
+    // ✅ ADDED: Additional meta tags for better social media sharing
+    other: {
+      'og:image:secure_url': imageUrl,
+      'og:image:width': '1200',
+      'og:image:height': '630',
+      'twitter:image:alt': post.featuredImage?.node?.altText || post.title,
+    }
   };
 
   return metadata;
