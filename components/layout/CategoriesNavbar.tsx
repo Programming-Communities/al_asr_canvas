@@ -36,8 +36,11 @@ const CategoriesNavbar: React.FC = () => {
 
   const isHomeActive = pathname === '/';
 
-  // Toggle category menu - CLICK BASED
-  const toggleCategoryMenu = (categorySlug: string) => {
+  // Toggle category menu - ONLY FOR DROPDOWN ARROW
+  const toggleCategoryMenu = (categorySlug: string, event?: React.MouseEvent) => {
+    if (event) {
+      event.stopPropagation(); // Prevent event bubbling
+    }
     setOpenCategory(openCategory === categorySlug ? null : categorySlug);
   };
 
@@ -71,9 +74,9 @@ const CategoriesNavbar: React.FC = () => {
         key={category.id}
         className="relative"
       >
-        {/* Category Button - CLICK TO TOGGLE MENU */}
+        {/* Category Button - SEPARATE LINK AND DROPDOWN */}
         <div className="flex items-center">
-          {/* Category Link */}
+          {/* Category Link - ALWAYS NAVIGATES TO CATEGORY PAGE */}
           <Link
             href={`/categories/${category.slug}`}
             className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap min-h-11 ${
@@ -81,13 +84,9 @@ const CategoriesNavbar: React.FC = () => {
                 ? 'text-white bg-white/30 backdrop-blur-sm shadow-lg'
                 : 'text-white/90 hover:text-white hover:bg-white/20 backdrop-blur-sm'
             } ${level > 0 ? 'pr-8' : ''}`}
-            onClick={(e) => {
-              if (hasChildren) {
-                e.preventDefault(); // Prevent navigation if has children
-                toggleCategoryMenu(category.slug);
-              } else {
-                setOpenCategory(null); // Close menu if no children
-              }
+            onClick={() => {
+              // Close menu when category link is clicked
+              setOpenCategory(null);
             }}
             aria-label={`Browse ${category.name} category`}
           >
@@ -99,10 +98,10 @@ const CategoriesNavbar: React.FC = () => {
             </span>
           </Link>
 
-          {/* Toggle Button for categories with children */}
+          {/* Toggle Button for categories with children - ONLY THIS OPENS DROPDOWN */}
           {hasChildren && (
             <button
-              onClick={() => toggleCategoryMenu(category.slug)}
+              onClick={(e) => toggleCategoryMenu(category.slug, e)}
               className={`p-3 rounded-lg transition-all duration-200 backdrop-blur-sm mx-1 min-h-11 min-w-11 ${
                 isOpen
                   ? 'bg-white/30 text-white'

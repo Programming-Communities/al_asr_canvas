@@ -15,7 +15,7 @@ const Header: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
-  // Wait for component to mount before running client-side code
+  // Wait for component to mount before running any client-side code
   useEffect(() => {
     setIsMounted(true);
     
@@ -23,17 +23,23 @@ const Header: React.FC = () => {
       setIsMobile(window.innerWidth < 768);
     };
 
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
+    // Only run on client side
+    if (typeof window !== 'undefined') {
+      checkMobile();
+      window.addEventListener('resize', checkMobile);
+    }
 
     return () => {
-      window.removeEventListener('resize', checkMobile);
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('resize', checkMobile);
+      }
     };
   }, []);
 
-  // Canvas animation code - only run on client side
+  // Canvas animation code - only run on client side after mount
   useEffect(() => {
-    if (!isMounted) return; // Don't run on server
+    // Don't run on server or if not mounted
+    if (!isMounted || typeof window === 'undefined') return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -41,12 +47,19 @@ const Header: React.FC = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    let animationFrameId: number;
+
     const resizeCanvas = () => {
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
+      if (canvas) {
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+      }
     };
 
+    // Initial resize
     resizeCanvas();
+    
+    // Add resize listener
     window.addEventListener('resize', resizeCanvas);
 
     class Particle {
@@ -67,7 +80,7 @@ const Header: React.FC = () => {
       reset() {
         if (!this.canvas) return;
         
-        // Use deterministic random based on seed to avoid hydration mismatch
+        // Use deterministic random based on seed
         const random = (offset: number = 0) => {
           const x = Math.sin(this.seed + offset) * 10000;
           return x - Math.floor(x);
@@ -94,8 +107,7 @@ const Header: React.FC = () => {
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
         
-        // Use deterministic color selection
-        const isRed = this.seed % 3 === 0; // Consistent color per particle
+        const isRed = this.seed % 3 === 0;
         ctx.fillStyle = isRed ? 'rgba(239, 68, 68, 0.9)' : 'rgba(255, 255, 255, 0.8)';
         ctx.shadowBlur = isRed ? 12 : 6;
         ctx.shadowColor = isRed ? '#ef4444' : '#ffffff';
@@ -107,7 +119,6 @@ const Header: React.FC = () => {
     const particles: Particle[] = [];
     const numParticles = 90;
 
-    // Create particles with deterministic seeds
     for (let i = 0; i < numParticles; i++) {
       particles.push(new Particle(canvas, i));
     }
@@ -131,8 +142,6 @@ const Header: React.FC = () => {
       }
     };
 
-    let animationFrameId: number;
-
     const animate = () => {
       if (!canvas || !ctx) return;
       
@@ -149,6 +158,7 @@ const Header: React.FC = () => {
       animationFrameId = requestAnimationFrame(animate);
     };
 
+    // Start animation
     animate();
 
     return () => {
@@ -161,6 +171,7 @@ const Header: React.FC = () => {
 
   return (
     <header className="relative bg-red-950 text-white overflow-hidden">
+      {/* Canvas - Render always but only animate after mount */}
       <canvas
         ref={canvasRef}
         className="absolute inset-0 w-full h-full pointer-events-none opacity-85"

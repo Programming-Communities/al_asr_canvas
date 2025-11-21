@@ -88,11 +88,12 @@ export default function RootLayout({ children }: RootLayoutProps) {
       data-scroll-behavior="smooth"
     >
       <head>
-        {/* ✅ PERFORMANCE OPTIMIZATIONS - ADD THESE LINES */}
-        <link rel="dns-prefetch" href="https://al-asr.centers.pk" />
-        <link rel="preconnect" href="https://al-asr.centers.pk" />
-        <link rel="dns-prefetch" href="https://admin-al-asr.centers.pk" />
-        <link rel="preconnect" href="https://admin-al-asr.centers.pk" crossOrigin="anonymous" />
+        {/* ✅ Font preloading for better performance */}
+        <link 
+          rel="preload" 
+          href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap" 
+          as="style" 
+        />
         
         {/* ✅ YOUR EXISTING META TAGS - KEEP AS IS */}
         <meta name="application-name" content="Al-Asr Islamic Service" />
@@ -123,7 +124,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         {/* ✅ Google Fonts - Optimized */}
         <link
           rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap"
         />
 
         {/* ✅ OG + Twitter Meta */}
@@ -438,6 +439,21 @@ export default function RootLayout({ children }: RootLayoutProps) {
                   optimizeLCP();
                 }
               })();
+            `,
+          }}
+        />
+
+        {/* ✅ Font loading optimization script */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // Optimize font loading
+              const fontLink = document.querySelector('link[href*="fonts.googleapis.com"]');
+              if (fontLink) {
+                fontLink.onload = function() {
+                  this.media = 'all';
+                };
+              }
             `,
           }}
         />

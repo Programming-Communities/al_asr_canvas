@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // ✅ Image optimizations - PERFORMANCE FOCUSED
+  // ✅ Image optimizations
   images: {
     remotePatterns: [
       {
@@ -9,11 +9,11 @@ const nextConfig = {
       },
     ],
     formats: ['image/webp', 'image/avif'],
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920], // Reduced from 8 to 6
-    imageSizes: [16, 32, 64, 96, 128, 256], // Reduced from 8 to 6
-    minimumCacheTTL: 3600,
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+    imageSizes: [16, 32, 64, 96, 128, 256],
+    minimumCacheTTL: 86400, // 1 day
     dangerouslyAllowSVG: true,
-    qualities: [65, 75, 90], // ✅ ADD THIS LINE - Fixes the quality warning
+    qualities: [75, 80, 90],
   },
 
   // ✅ Compiler optimizations
@@ -54,6 +54,16 @@ const nextConfig = {
           },
         ],
       },
+      // Cloudflare compatible headers
+      {
+        source: '/(.*)\\.(jpg|jpeg|png|gif|ico|webp)$',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
     ];
   },
 
@@ -61,7 +71,10 @@ const nextConfig = {
   experimental: {
     optimizeCss: true,
     optimizePackageImports: ['lucide-react'],
-  }
+  },
+
+  // ✅ Output standalone for better deployment
+  output: 'standalone',
 }
 
-module.exports = nextConfig
+module.exports = nextConfig;
