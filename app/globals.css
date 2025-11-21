@@ -559,3 +559,24 @@ a:focus-visible {
 
 
 
+/* Add this to your existing globals.css */
+@keyframes pulse-slow {
+  0%, 100% { 
+    opacity: 0.03; 
+  }
+  50% { 
+    opacity: 0.08; 
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 6s ease-in-out infinite;
+}
+
+/* Reduce motion support */
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse-slow {
+    animation: none;
+    opacity: 0.05;
+  }
+}

@@ -1,8 +1,28 @@
 // app/sitemap.js
-import { GraphQLClient } from 'graphql-request';
-
 const baseUrl = 'https://al-asr.centers.pk';
-const client = new GraphQLClient('https://admin-al-asr.centers.pk/graphql');
+
+// Simple fetch function without graphql-request
+async function fetchGraphQL(query) {
+  try {
+    const response = await fetch('https://admin-al-asr.centers.pk/graphql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ query }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.data;
+  } catch (error) {
+    console.error('GraphQL fetch error:', error);
+    return null;
+  }
+}
 
 export default async function sitemap() {
   try {
@@ -30,7 +50,7 @@ export default async function sitemap() {
     }));
 
     const categoryUrls = categories.map((c) => ({
-      url: `${baseUrl}/category/${c.slug}`,
+      url: `${baseUrl}/categories/${c.slug}`, // ✅ Fixed: /categories/ instead of /category/
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.7,
@@ -78,8 +98,8 @@ async function fetchPosts() {
         }
       }
     `;
-    const data = await client.request(query);
-    return data.posts.nodes || [];
+    const data = await fetchGraphQL(query);
+    return data?.posts?.nodes || [];
   } catch {
     return [];
   }
@@ -99,9 +119,9 @@ async function fetchPages() {
         }
       }
     `;
-    const data = await client.request(query);
+    const data = await fetchGraphQL(query);
     // 🔒 Filter out unwanted system pages if any
-    return (data.pages.nodes || []).filter(
+    return (data?.pages?.nodes || []).filter(
       (p) =>
         !['tag', 'author', 'feed', 'search'].includes(p.slug.toLowerCase())
     );
@@ -122,8 +142,8 @@ async function fetchCategories() {
         }
       }
     `;
-    const data = await client.request(query);
-    return data.categories.nodes || [];
+    const data = await fetchGraphQL(query);
+    return data?.categories?.nodes || [];
   } catch {
     return [];
   }

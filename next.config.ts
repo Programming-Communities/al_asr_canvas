@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // ✅ Image optimizations - PERFORMANCE FOCUSED
+  // ✅ Image optimizations - PRODUCTION FOCUSED
   images: {
     remotePatterns: [
       {
@@ -10,10 +10,10 @@ const nextConfig = {
     ],
     formats: ['image/webp', 'image/avif'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
-    imageSizes: [16, 32, 64, 96, 128, 256],
-    minimumCacheTTL: 3600,
+    imageSizes: [16, 32, 48, 64, 96, 128],
+    minimumCacheTTL: 86400,
     dangerouslyAllowSVG: true,
-    qualities: [65, 75, 90],
+    quality: 75,
   },
 
   // ✅ Compiler optimizations
@@ -24,6 +24,7 @@ const nextConfig = {
   // ✅ Performance optimizations
   poweredByHeader: false,
   compress: true,
+  swcMinify: true,
 
   // ✅ Security headers
   async headers() {
@@ -43,6 +44,11 @@ const nextConfig = {
             key: 'X-XSS-Protection',
             value: '1; mode=block'
           },
+        ],
+      },
+      {
+        source: '/_next/static/(.*)',
+        headers: [
           {
             key: 'Cache-Control',
             value: 'public, max-age=31536000, immutable',
@@ -50,7 +56,7 @@ const nextConfig = {
         ],
       },
       {
-        source: '/_next/static/(.*)',
+        source: '/(.*)\\.(jpg|jpeg|png|gif|ico|webp|svg)$',
         headers: [
           {
             key: 'Cache-Control',
@@ -64,10 +70,10 @@ const nextConfig = {
   // ✅ Experimental optimizations
   experimental: {
     optimizeCss: true,
-    optimizePackageImports: ['lucide-react'],
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-dropdown-menu'],
   },
 
-  // ✅ Reduce legacy JavaScript
+  // ✅ Modern JavaScript only
   transpilePackages: [],
 }
 

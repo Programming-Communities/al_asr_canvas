@@ -4,7 +4,6 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import SocialShareButtons from '../shared/SocialShareButtons';
 import { Post } from '@/types/blog';
-import { CardLoader } from '../shared/CardLoader'; // ✅ ADD THIS IMPORT
 
 interface BlogItemProps extends Post {
   index?: number;
@@ -30,7 +29,7 @@ const BlogItem: React.FC<BlogItemProps> = ({
   const [showSocialMenu, setShowSocialMenu] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
-  const [isCardLoading, setIsCardLoading] = useState(false); // ✅ ADD CARD LOADING STATE
+  const [isImageLoading, setIsImageLoading] = useState(false); // ✅ For image navigation loading
   
   const socialMenuRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -65,16 +64,16 @@ const BlogItem: React.FC<BlogItemProps> = ({
     }
   }, [date]);
 
-  // ✅ UPDATED: Navigation handler with CARD loading
+  // ✅ UPDATED: Navigation handler with IMAGE-ONLY loader
   const handleNavigation = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsCardLoading(true); // ✅ SHOW CARD LOADER
+    setIsImageLoading(true); // ✅ SHOW IMAGE LOADER ONLY
     
-    // Navigate after a small delay to show loader
+    // Navigate after showing loader briefly
     setTimeout(() => {
       router.push(`/posts/${slug}`);
-    }, 100);
+    }, 300);
   }, [router, slug]);
 
   const handleShareClick = useCallback((e: React.MouseEvent) => {
@@ -131,7 +130,7 @@ const BlogItem: React.FC<BlogItemProps> = ({
   }, []);
 
   // ✅ Optimized blur data URL
-  const blurDataURL = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q==";
+  const blurDataURL = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgDRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q==";
 
   return (
     <article 
@@ -148,9 +147,6 @@ const BlogItem: React.FC<BlogItemProps> = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* ✅ CARD LOADER - Shows on card click */}
-      {isCardLoading && <CardLoader size="md" />}
-
       {/* Image Container - Optimized */}
       <div className="relative h-48 w-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
         <div 
@@ -160,6 +156,7 @@ const BlogItem: React.FC<BlogItemProps> = ({
         >
           {featuredImage?.node?.sourceUrl && !imageError ? (
             <>
+              {/* ✅ IMAGE - Always fully visible */}
               <Image
                 src={featuredImage.node.sourceUrl}
                 alt={featuredImage.node.altText || title}
@@ -176,12 +173,30 @@ const BlogItem: React.FC<BlogItemProps> = ({
                 blurDataURL={blurDataURL}
               />
               
-              {imageLoading && (
+              {/* ✅ LOADER OVERLAY - On top of visible image */}
+              {isImageLoading && (
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-10">
+                  <div className="text-center">
+                    {/* ✅ RED/BLACK LOADER */}
+                    <div className="flex items-center justify-center">
+                      // ✅ AFTER (fixed - no duplicates):
+<div className="animate-spin rounded-full h-8 w-8 border-2 border-red-500"></div>
+                    </div>
+                    <p className="text-white text-xs font-medium mt-2 bg-black/50 px-2 py-1 rounded-md">
+                      Loading Post...
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {imageLoading && !isImageLoading && (
                 <div className="absolute inset-0 bg-gray-200 dark:bg-gray-700 animate-pulse" />
               )}
 
               {/* Read Article Overlay */}
-              <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+              <div className={`absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center ${
+                isImageLoading ? 'opacity-0' : ''
+              }`}>
                 <span className="text-white text-xs font-semibold bg-red-600/90 px-3 py-2 rounded-lg backdrop-blur-sm">
                   Read Article
                 </span>
@@ -192,20 +207,33 @@ const BlogItem: React.FC<BlogItemProps> = ({
               className="flex flex-col items-center justify-center h-full w-full bg-gray-100 dark:bg-gray-800 p-4 text-center cursor-pointer"
               onClick={handleNavigation}
             >
-              <div className="flex flex-col items-center gap-2">
-                <svg className="w-8 h-8 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <p className="text-gray-500 dark:text-gray-400 text-xs">
-                  {imageError ? 'Image unavailable' : 'Featured Image'}
-                </p>
-              </div>
+              {/* ✅ LOADER for missing images too */}
+              {isImageLoading ? (
+                <div className="text-center">
+                  {/* ✅ RED/BLACK LOADER */}
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-2 border-red-500"></div>
+                  </div>
+                  <p className="text-gray-700 dark:text-gray-300 text-xs font-medium mt-2">
+                    Loading Post...
+                  </p>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-2">
+                  <svg className="w-8 h-8 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <p className="text-gray-500 dark:text-gray-400 text-xs">
+                    {imageError ? 'Image unavailable' : 'Featured Image'}
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </div>
       </div>
 
-      {/* Content Section */}
+      {/* ✅ CONTENT SECTION - Always visible, never hidden */}
       <div className="p-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
         {/* Meta Information */}
         <div className="flex items-center gap-2 mb-2 text-xs text-gray-500 dark:text-gray-400 flex-wrap">

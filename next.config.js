@@ -33,16 +33,44 @@ const nextConfig = {
         headers: [
           {
             key: 'X-Content-Type-Options',
-            value: 'nosniff'
+            value: 'nosniff',
           },
           {
             key: 'X-Frame-Options',
-            value: 'DENY'
+            value: 'SAMEORIGIN',
           },
           {
             key: 'X-XSS-Protection',
-            value: '1; mode=block'
-          }
+            value: '1; mode=block',
+          },
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=31536000; includeSubDomains; preload',
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: "default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'",
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'geolocation=(), microphone=(), camera=(), fullscreen=(self), payment=()',
+          },
+          {
+            key: 'Cross-Origin-Embedder-Policy',
+            value: 'require-corp',
+          },
+          {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin',
+          },
+          {
+            key: 'Cross-Origin-Resource-Policy',
+            value: 'same-origin',
+          },
         ],
       },
       {
@@ -54,7 +82,7 @@ const nextConfig = {
           },
         ],
       },
-      // Cloudflare compatible headers
+      // Cloudflare compatible headers for images
       {
         source: '/(.*)\\.(jpg|jpeg|png|gif|ico|webp)$',
         headers: [
@@ -75,6 +103,6 @@ const nextConfig = {
 
   // ✅ Output standalone for better deployment
   output: 'standalone',
-}
+};
 
 module.exports = nextConfig;
