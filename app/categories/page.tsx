@@ -7,23 +7,25 @@ import Link from 'next/link';
 import { Category } from '@/types/blog';
 
 export const metadata: Metadata = {
-  title: 'All Categories | Al-Asr Islamic Service',
-  description: 'Browse all categories and posts from Al-Asr Islamic Service',
+  title: 'Islamic Categories | Al-Asr Islamic Service',
+  description: 'Explore comprehensive Islamic content organized into meaningful categories for spiritual growth and learning',
 };
 
-// Category colors array - defined outside component
-const categoryColors = [
-  'from-red-500 to-orange-500',
-  'from-blue-500 to-cyan-500', 
-  'from-green-500 to-emerald-500',
-  'from-purple-500 to-pink-500',
-  'from-yellow-500 to-amber-500',
-  'from-indigo-500 to-blue-500',
-  'from-teal-500 to-green-500',
-  'from-orange-500 to-red-500',
-  'from-pink-500 to-rose-500',
-  'from-cyan-500 to-blue-500'
+// Modern 2026 Color Palette
+const categoryGradients = [
+  'from-red-600 via-red-500 to-orange-500',
+  'from-blue-600 via-blue-500 to-cyan-500', 
+  'from-emerald-600 via-emerald-500 to-green-500',
+  'from-purple-600 via-purple-500 to-pink-500',
+  'from-amber-600 via-amber-500 to-yellow-500',
+  'from-indigo-600 via-indigo-500 to-blue-500',
+  'from-teal-600 via-teal-500 to-emerald-500',
+  'from-rose-600 via-rose-500 to-pink-500',
+  'from-cyan-600 via-cyan-500 to-blue-500',
+  'from-violet-600 via-violet-500 to-purple-500'
 ];
+
+const getCategoryGradient = (index: number) => categoryGradients[index % categoryGradients.length];
 
 export default async function CategoriesPage() {
   const [allPosts, allCategories] = await Promise.all([
@@ -31,128 +33,167 @@ export default async function CategoriesPage() {
     getAllCategories()
   ]);
 
+  // Calculate statistics
+  const totalPosts = allPosts.length;
+  const totalCategories = allCategories.length;
+  const parentCategories = allCategories.filter(cat => cat.children && cat.children.length > 0).length;
+  const totalSubCategories = allCategories.reduce((acc, cat) => acc + (cat.children?.length || 0), 0);
+
   return (
     <Layout>
-      <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
-        <div className="container mx-auto px-4 py-12">
-          {/* Premium Header Section */}
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-linear-to-r from-red-600 to-red-700 rounded-2xl shadow-2xl mb-6">
-              <span className="text-2xl text-white">📚</span>
+      {/* Premium Background with Gradient */}
+      <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-slate-900">
+        
+        {/* Animated Background Elements */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-red-500/5 rounded-full blur-3xl"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500/5 rounded-full blur-3xl"></div>
+        </div>
+
+        <div className="relative container mx-auto px-4 py-16">
+          
+          {/* Premium Hero Section */}
+          <section className="text-center mb-20 relative">
+            {/* Decorative Elements */}
+            <div className="absolute top-10 left-1/4 w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+            <div className="absolute top-20 right-1/3 w-1 h-1 bg-blue-500 rounded-full animate-pulse delay-300"></div>
+            
+            <div className="inline-flex items-center justify-center w-24 h-24 bg-linear-to-r from-red-600 to-red-700 rounded-3xl shadow-2xl mb-8 relative overflow-hidden">
+              <div className="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
+              <span className="text-3xl text-white relative z-10">📚</span>
             </div>
-            <h1 className="text-5xl md:text-6xl font-bold bg-linear-to-r from-gray-900 to-red-700 dark:from-white dark:to-red-400 bg-clip-text text-transparent mb-6">
-              Islamic Categories
+            
+            <h1 className="text-6xl md:text-7xl font-black bg-linear-to-r from-gray-900 via-red-700 to-red-600 dark:from-white dark:via-red-400 dark:to-red-500 bg-clip-text text-transparent mb-6 leading-tight">
+              Islamic Library
             </h1>
-            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
-              Explore comprehensive Islamic content organized into meaningful categories for easy discovery and learning
+            
+            <p className="text-2xl md:text-3xl text-gray-600 dark:text-gray-300 max-w-4xl mx-auto leading-relaxed font-light mb-8">
+              Journey through comprehensive Islamic knowledge, meticulously organized for your spiritual growth
             </p>
-            <div className="flex items-center justify-center space-x-4 mt-8 text-sm text-gray-500 dark:text-gray-400">
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span>{allCategories.length} Categories</span>
-              </div>
-              <div className="w-1 h-1 bg-gray-300 rounded-full"></div>
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span>{allPosts.length} Total Posts</span>
-              </div>
+            
+            {/* Stats Bar */}
+            <div className="inline-flex items-center justify-center space-x-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl px-8 py-4 shadow-2xl border border-gray-200/50 dark:border-gray-700/50">
+              {[
+                { value: totalCategories, label: 'Categories', color: 'text-red-600' },
+                { value: totalPosts, label: 'Articles', color: 'text-blue-600' },
+                { value: parentCategories, label: 'Main Topics', color: 'text-emerald-600' },
+                { value: totalSubCategories, label: 'Sub-topics', color: 'text-purple-600' }
+              ].map((stat, index) => (
+                <div key={stat.label} className="text-center">
+                  <div className={`text-2xl font-bold ${stat.color} mb-1`}>
+                    {stat.value}
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider">
+                    {stat.label}
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
+          </section>
 
           {/* Premium Categories Grid */}
-          <div className="mb-20">
-            <div className="flex items-center justify-between mb-12">
+          <section className="mb-24">
+            <div className="flex items-center justify-between mb-16">
               <div>
-                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-3">
-                  Browse Categories
+                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+                  Explore Categories
                 </h2>
-                <p className="text-gray-600 dark:text-gray-400 text-lg">
-                  Click anywhere on a category card to explore its content
+                <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl">
+                  Dive deep into specialized Islamic topics with our carefully curated categories
                 </p>
               </div>
-              <div className="hidden md:flex items-center space-x-2 bg-white dark:bg-gray-800 px-4 py-2 rounded-full shadow-lg border border-gray-200 dark:border-gray-700">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Total:</span>
-                <span className="text-red-600 dark:text-red-400 font-bold">{allCategories.length}</span>
+              
+              <div className="hidden lg:flex items-center space-x-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl px-6 py-3 rounded-2xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  {totalCategories} Categories
+                </span>
               </div>
             </div>
             
+            {/* Enhanced Categories Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
               {allCategories.map((category, index) => {
-                const categoryColor = categoryColors[index % categoryColors.length];
+                const gradient = getCategoryGradient(index);
                 
                 return (
                   <div
                     key={category.id}
-                    className="group relative bg-white dark:bg-gray-800 rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-500 transform hover:-translate-y-2 border border-gray-200 dark:border-gray-700 overflow-hidden cursor-pointer"
+                    className="group relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-700 transform hover:-translate-y-3 border border-gray-200/50 dark:border-gray-700/50 overflow-hidden cursor-pointer"
                   >
-                    {/* Gradient Background */}
-                    <div className={`absolute inset-0 bg-linear-to-br ${categoryColor} opacity-5 group-hover:opacity-10 transition-opacity duration-500`}></div>
+                    {/* Animated Gradient Background */}
+                    <div className={`absolute inset-0 bg-linear-to-br ${gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-700`}></div>
+                    
+                    {/* Glow Effect */}
+                    <div className={`absolute inset-0 bg-linear-to-br ${gradient} opacity-0 group-hover:opacity-10 blur-xl transition-all duration-1000`}></div>
                     
                     {/* Content */}
-                    <div className="relative p-8">
+                    <div className="relative p-8 z-10">
+                      
                       {/* Category Header */}
                       <div className="flex items-start justify-between mb-6">
                         <div className="flex items-center space-x-4">
-                          <div className={`w-14 h-14 bg-linear-to-r ${categoryColor} rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                            <span className="text-xl text-white font-bold">
+                          <div className={`relative w-16 h-16 bg-linear-to-r ${gradient} rounded-2xl flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-500 overflow-hidden`}>
+                            <div className="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
+                            <span className="text-2xl text-white font-bold relative z-10">
                               {category.name.charAt(0)}
                             </span>
                           </div>
                           <div>
                             <Link href={`/categories/${category.slug}`}>
-                              <h3 className="text-2xl font-bold text-gray-900 dark:text-white group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors duration-300 cursor-pointer">
+                              <h3 className="text-2xl font-bold text-gray-900 dark:text-white group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors duration-500 cursor-pointer line-clamp-2">
                                 {category.name}
                               </h3>
                             </Link>
-                            <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
-                              Islamic Content
+                            <p className="text-gray-500 dark:text-gray-400 text-sm mt-2 font-medium">
+                              Islamic Knowledge
                             </p>
                           </div>
                         </div>
                         
-                        {/* Post Count Badge */}
+                        {/* Enhanced Post Count */}
                         <Link href={`/categories/${category.slug}`}>
-                          <div className="bg-linear-to-r from-red-500 to-red-600 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg cursor-pointer hover:from-red-600 hover:to-red-700 transition-all duration-300">
+                          <div className={`bg-linear-to-r ${gradient} text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:scale-105`}>
                             {category.count}
                           </div>
                         </Link>
                       </div>
 
-                      {/* Sub-categories */}
+                      {/* Sub-categories with Enhanced Design */}
                       {category.children && category.children.length > 0 && (
                         <div className="mb-6">
-                          <div className="flex items-center space-x-2 mb-3">
-                            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Sub-categories:</span>
-                            <span className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 px-2 py-1 rounded-full">
+                          <div className="flex items-center space-x-3 mb-4">
+                            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Sub-topics</span>
+                            <span className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 px-3 py-1 rounded-full font-medium">
                               {category.children.length}
                             </span>
                           </div>
                           <div className="flex flex-wrap gap-2">
-                            {category.children.slice(0, 4).map((child) => (
+                            {category.children.slice(0, 3).map((child) => (
                               <Link
                                 key={child.id}
                                 href={`/categories/${child.slug}`}
-                                className="text-xs bg-linear-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 text-gray-700 dark:text-gray-300 px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 hover:border-red-300 dark:hover:border-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-all duration-200 font-medium"
+                                className="text-sm bg-white/80 dark:bg-gray-700/80 text-gray-700 dark:text-gray-300 px-3 py-2 rounded-lg border border-gray-300/50 dark:border-gray-600/50 hover:border-red-300 dark:hover:border-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-all duration-300 font-medium backdrop-blur-sm"
                               >
                                 {child.name}
                               </Link>
                             ))}
-                            {category.children.length > 4 && (
-                              <span className="text-xs bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-400 px-3 py-1.5 rounded-full">
-                                +{category.children.length - 4} more
+                            {category.children.length > 3 && (
+                              <span className="text-sm bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-400 px-3 py-2 rounded-lg">
+                                +{category.children.length - 3}
                               </span>
                             )}
                           </div>
                         </div>
                       )}
 
-                      {/* Action Button */}
-                      <div className="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
+                      {/* Enhanced Action Section */}
+                      <div className="flex items-center justify-between pt-6 border-t border-gray-200/50 dark:border-gray-700/50">
                         <Link
                           href={`/categories/${category.slug}`}
-                          className="flex items-center space-x-2 bg-linear-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 group/btn"
+                          className={`flex items-center space-x-3 bg-linear-to-r ${gradient} hover:shadow-2xl text-white px-6 py-3 rounded-xl font-bold shadow-lg transition-all duration-500 transform hover:scale-105 group/btn cursor-pointer`}
                         >
-                          <span>Explore Category</span>
+                          <span>Explore</span>
                           <svg 
                             className="w-4 h-4 transform group-hover/btn:translate-x-1 transition-transform duration-300" 
                             fill="none" 
@@ -167,117 +208,90 @@ export default async function CategoriesPage() {
                           <div className="text-2xl font-bold text-gray-900 dark:text-white">
                             {category.count}
                           </div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                            Posts
+                          <div className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-widest font-semibold">
+                            Articles
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    {/* Hover Effect Border */}
-                    <div className="absolute inset-0 rounded-3xl border-2 border-transparent group-hover:border-red-500/20 transition-all duration-500"></div>
+                    {/* Enhanced Hover Border */}
+                    <div className={`absolute inset-0 rounded-3xl border-2 border-transparent group-hover:border-linear-to-r ${gradient} group-hover:border-opacity-30 transition-all duration-700`}></div>
                   </div>
                 );
               })}
             </div>
-          </div>
+          </section>
 
-          {/* Statistics Section */}
-          <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 mb-16 border border-gray-200 dark:border-gray-700">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-              <div className="text-center">
-                <div className="text-4xl font-bold text-red-600 dark:text-red-400 mb-2">
-                  {allCategories.length}
+          {/* Premium Featured Posts Section */}
+          <section className="mb-20">
+            <div className="bg-linear-to-r from-gray-900 via-red-900 to-red-800 dark:from-gray-800 dark:via-red-900 dark:to-red-800 rounded-3xl p-1 shadow-2xl">
+              <div className="bg-white dark:bg-gray-900 rounded-2xl p-12 relative overflow-hidden">
+                {/* Background Pattern */}
+                <div className="absolute top-0 right-0 w-64 h-64 bg-red-500/5 rounded-full -translate-y-32 translate-x-32"></div>
+                
+                <div className="text-center mb-16 relative z-10">
+                  <h2 className="text-5xl md:text-6xl font-black text-gray-900 dark:text-white mb-6">
+                    Latest Insights
+                  </h2>
+                  <p className="text-2xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto font-light">
+                    Discover fresh perspectives and timeless wisdom from our latest publications
+                  </p>
                 </div>
-                <div className="text-gray-600 dark:text-gray-400 font-semibold">
-                  Total Categories
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">
-                  {allPosts.length}
-                </div>
-                <div className="text-gray-600 dark:text-gray-400 font-semibold">
-                  Total Posts
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="text-4xl font-bold text-green-600 dark:text-green-400 mb-2">
-                  {allCategories.filter(cat => cat.children && cat.children.length > 0).length}
-                </div>
-                <div className="text-gray-600 dark:text-gray-400 font-semibold">
-                  Parent Categories
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="text-4xl font-bold text-purple-600 dark:text-purple-400 mb-2">
-                  {allCategories.reduce((acc, cat) => acc + (cat.children?.length || 0), 0)}
-                </div>
-                <div className="text-gray-600 dark:text-gray-400 font-semibold">
-                  Sub-categories
-                </div>
+                
+                <BlogList 
+                  showTitle={false}
+                  initialPosts={allPosts.slice(0, 12)}
+                />
+                
+                {allPosts.length > 12 && (
+                  <div className="text-center mt-16">
+                    <Link
+                      href="/"
+                      className="inline-flex items-center bg-linear-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-10 py-4 rounded-2xl font-bold text-lg shadow-2xl hover:shadow-3xl transition-all duration-500 transform hover:scale-105"
+                    >
+                      <span>Explore All Articles</span>
+                      <svg className="w-5 h-5 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                      </svg>
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
-          </div>
+          </section>
 
-          {/* All Posts Section with Premium Header */}
-          <div className="bg-linear-to-r from-gray-900 to-red-900 dark:from-gray-800 dark:to-red-900 rounded-3xl p-1 mb-12">
-            <div className="bg-white dark:bg-gray-900 rounded-2xl p-8">
-              <div className="text-center mb-12">
-                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-                  Latest Islamic Content
-                </h2>
-                <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                  Discover the most recent posts across all categories
+          {/* Premium Call to Action */}
+          <section className="text-center">
+            <div className="bg-linear-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 rounded-3xl p-12 border border-red-200 dark:border-red-800 relative overflow-hidden">
+              {/* Background Elements */}
+              <div className="absolute top-0 left-0 w-32 h-32 bg-red-500/10 rounded-full -translate-x-16 -translate-y-16"></div>
+              <div className="absolute bottom-0 right-0 w-32 h-32 bg-orange-500/10 rounded-full translate-x-16 translate-y-16"></div>
+              
+              <div className="relative z-10">
+                <h3 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-6">
+                  Continue Your Journey
+                </h3>
+                <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto font-light">
+                  Beyond categories, explore our comprehensive Islamic services and spiritual resources
                 </p>
-              </div>
-              
-              <BlogList 
-                showTitle={false}
-                initialPosts={allPosts.slice(0, 12)}
-              />
-              
-              {allPosts.length > 12 && (
-                <div className="text-center mt-12">
+                <div className="flex flex-wrap justify-center gap-6">
                   <Link
-                    href="/"
-                    className="inline-flex items-center bg-linear-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105"
+                    href="/services"
+                    className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-8 py-4 rounded-2xl font-bold shadow-2xl hover:shadow-3xl transition-all duration-500 border border-gray-300 dark:border-gray-600 hover:border-red-300 dark:hover:border-red-700 hover:scale-105"
                   >
-                    <span>View All Posts</span>
-                    <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                    </svg>
+                    Our Services
+                  </Link>
+                  <Link
+                    href="/contact"
+                    className="bg-linear-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-8 py-4 rounded-2xl font-bold shadow-2xl hover:shadow-3xl transition-all duration-500 transform hover:scale-105"
+                  >
+                    Get Guidance
                   </Link>
                 </div>
-              )}
-            </div>
-          </div>
-
-          {/* Call to Action */}
-          <div className="text-center">
-            <div className="bg-linear-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 rounded-3xl p-8 border border-red-200 dark:border-red-800">
-              <h3 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">
-                Can't Find What You're Looking For?
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300 mb-6 max-w-2xl mx-auto">
-                Explore our comprehensive Islamic services and resources beyond blog posts
-              </p>
-              <div className="flex flex-wrap justify-center gap-4">
-                <Link
-                  href="/services"
-                  className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-300 dark:border-gray-600 hover:border-red-300 dark:hover:border-red-700"
-                >
-                  Our Services
-                </Link>
-                <Link
-                  href="/contact"
-                  className="bg-linear-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
-                >
-                  Get in Touch
-                </Link>
               </div>
             </div>
-          </div>
+          </section>
         </div>
       </div>
     </Layout>
