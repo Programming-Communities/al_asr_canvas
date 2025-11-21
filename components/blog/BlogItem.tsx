@@ -29,16 +29,22 @@ const BlogItem: React.FC<BlogItemProps> = ({
   const [showSocialMenu, setShowSocialMenu] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
-  const [isImageLoading, setIsImageLoading] = useState(false); // ✅ For image navigation loading
+  const [isImageLoading, setIsImageLoading] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   
   const socialMenuRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
+  // ✅ Fix hydration: Wait for component to mount
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   // ✅ Optimized memoized values
   const postUrl = useMemo(() => 
-    typeof window !== 'undefined' ? `${window.location.origin}/posts/${slug}` : '',
-    [slug]
+    isMounted ? `${window.location.origin}/posts/${slug}` : '',
+    [slug, isMounted]
   );
 
   const cleanExcerpt = useMemo(() => {
@@ -64,11 +70,11 @@ const BlogItem: React.FC<BlogItemProps> = ({
     }
   }, [date]);
 
-  // ✅ UPDATED: Navigation handler with IMAGE-ONLY loader
+  // ✅ Navigation handler with IMAGE-ONLY loader
   const handleNavigation = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsImageLoading(true); // ✅ SHOW IMAGE LOADER ONLY
+    setIsImageLoading(true);
     
     // Navigate after showing loader briefly
     setTimeout(() => {
@@ -86,8 +92,10 @@ const BlogItem: React.FC<BlogItemProps> = ({
     setShowSocialMenu(false);
   }, []);
 
-  // ✅ Optimized Intersection Observer
+  // ✅ Optimized Intersection Observer - Only run on client
   useEffect(() => {
+    if (!isMounted) return;
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -103,10 +111,12 @@ const BlogItem: React.FC<BlogItemProps> = ({
     }
 
     return () => observer.disconnect();
-  }, []);
+  }, [isMounted]);
 
   // ✅ Optimized click outside handler
   useEffect(() => {
+    if (!isMounted) return;
+
     const handleClickOutside = (event: MouseEvent) => {
       if (socialMenuRef.current && !socialMenuRef.current.contains(event.target as Node)) {
         setShowSocialMenu(false);
@@ -117,7 +127,7 @@ const BlogItem: React.FC<BlogItemProps> = ({
       document.addEventListener('mousedown', handleClickOutside);
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }
-  }, [showSocialMenu]);
+  }, [showSocialMenu, isMounted]);
 
   // ✅ Optimized image handlers
   const handleImageError = useCallback(() => {
@@ -129,8 +139,19 @@ const BlogItem: React.FC<BlogItemProps> = ({
     setImageLoading(false);
   }, []);
 
-  // ✅ Optimized blur data URL
-  const blurDataURL = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgDRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q==";
+  // ✅ Remove blurDataURL to fix hydration - use simple loading state instead
+  if (!isMounted) {
+    return (
+      <article className="w-full bg-white/90 dark:bg-gray-900/90 border-2 border-red-900/20 dark:border-red-800/30 rounded-xl backdrop-blur-sm mx-auto overflow-hidden">
+        <div className="relative h-48 w-full bg-gray-200 dark:bg-gray-700 animate-pulse" />
+        <div className="p-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
+          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-2 animate-pulse"></div>
+          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded mb-3 animate-pulse"></div>
+          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3 animate-pulse"></div>
+        </div>
+      </article>
+    );
+  }
 
   return (
     <article 
@@ -156,7 +177,7 @@ const BlogItem: React.FC<BlogItemProps> = ({
         >
           {featuredImage?.node?.sourceUrl && !imageError ? (
             <>
-              {/* ✅ IMAGE - Always fully visible */}
+              {/* ✅ IMAGE - Fixed hydration by removing blurDataURL */}
               <Image
                 src={featuredImage.node.sourceUrl}
                 alt={featuredImage.node.altText || title}
@@ -169,23 +190,13 @@ const BlogItem: React.FC<BlogItemProps> = ({
                 priority={index < 2}
                 sizes="(max-width: 640px) 90vw, (max-width: 768px) 45vw, (max-width: 1024px) 30vw, 25vw"
                 quality={65}
-                placeholder="blur"
-                blurDataURL={blurDataURL}
+                // ❌ Removed placeholder="blur" and blurDataURL to fix hydration
               />
               
-              {/* ✅ LOADER OVERLAY - On top of visible image */}
+              {/* ✅ LOADER OVERLAY - Only spinner, no text */}
               {isImageLoading && (
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-10">
-                  <div className="text-center">
-                    {/* ✅ RED/BLACK LOADER */}
-                    <div className="flex items-center justify-center">
-                      // ✅ AFTER (fixed - no duplicates):
-<div className="animate-spin rounded-full h-8 w-8 border-2 border-red-500"></div>
-                    </div>
-                    <p className="text-white text-xs font-medium mt-2 bg-black/50 px-2 py-1 rounded-md">
-                      Loading Post...
-                    </p>
-                  </div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-2 border-red-500"></div>
                 </div>
               )}
 
@@ -207,16 +218,10 @@ const BlogItem: React.FC<BlogItemProps> = ({
               className="flex flex-col items-center justify-center h-full w-full bg-gray-100 dark:bg-gray-800 p-4 text-center cursor-pointer"
               onClick={handleNavigation}
             >
-              {/* ✅ LOADER for missing images too */}
+              {/* ✅ LOADER for missing images - Only spinner */}
               {isImageLoading ? (
-                <div className="text-center">
-                  {/* ✅ RED/BLACK LOADER */}
-                  <div className="flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-2 border-red-500"></div>
-                  </div>
-                  <p className="text-gray-700 dark:text-gray-300 text-xs font-medium mt-2">
-                    Loading Post...
-                  </p>
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-2 border-red-500"></div>
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-2">
