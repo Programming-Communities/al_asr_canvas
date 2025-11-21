@@ -47,7 +47,7 @@ async function fetchGraphQL(query: string, variables?: any) {
   }
 }
 
-// ✅ GET ALL POSTS FUNCTION - CLEAN GRAPHQL QUERY
+// ✅ GET ALL POSTS FUNCTION - UPDATED WITH MODIFIED FIELD FOR SOCIAL SHARING
 export async function getPosts(): Promise<Post[]> {
   try {
     console.log('📝 Fetching posts from WordPress...');
@@ -61,11 +61,16 @@ export async function getPosts(): Promise<Post[]> {
             content
             excerpt
             date
+            modified
             slug
             featuredImage {
               node {
                 sourceUrl
                 altText
+                mediaDetails {
+                  width
+                  height
+                }
               }
             }
             categories {
@@ -94,8 +99,11 @@ export async function getPosts(): Promise<Post[]> {
   }
 }
 
+// ✅ GET SINGLE POST - UPDATED WITH MODIFIED FIELD FOR SOCIAL SHARING
 export async function getPost(slug: string): Promise<Post | null> {
   try {
+    console.log(`📄 Fetching post: ${slug}`);
+    
     const data = await fetchGraphQL(`
       query GetPost($slug: ID!) {
         post(id: $slug, idType: SLUG) {
@@ -104,11 +112,16 @@ export async function getPost(slug: string): Promise<Post | null> {
           content
           excerpt
           date
+          modified
           slug
           featuredImage {
             node {
               sourceUrl
               altText
+              mediaDetails {
+                width
+                height
+              }
             }
           }
           categories {
@@ -126,14 +139,46 @@ export async function getPost(slug: string): Promise<Post | null> {
       }
     `, { slug });
 
-    return data?.post || null;
+    if (data?.post) {
+      console.log(`✅ Successfully fetched post: ${data.post.title}`);
+      return data.post;
+    } else {
+      console.log(`❌ Post not found: ${slug}`);
+      return null;
+    }
   } catch (error) {
-    console.error('Error fetching post:', error);
+    console.error(`❌ Error fetching post ${slug}:`, error);
     return null;
   }
 }
 
-// ✅ GET ALL CATEGORIES FUNCTION - CLEAN GRAPHQL QUERY
+// ✅ GET POSTS FOR SITEMAP - OPTIMIZED FOR PERFORMANCE
+export async function getPostsForSitemap(): Promise<{slug: string; modified: string}[]> {
+  try {
+    console.log('🗺️ Fetching posts for sitemap...');
+    
+    const data = await fetchGraphQL(`
+      query GetPostsForSitemap {
+        posts(first: 100, where: {status: PUBLISH}) {
+          nodes {
+            slug
+            modified
+          }
+        }
+      }
+    `);
+
+    const posts = data?.posts?.nodes || [];
+    console.log(`✅ Retrieved ${posts.length} posts for sitemap`);
+    
+    return posts;
+  } catch (error) {
+    console.error('❌ Error fetching posts for sitemap:', error);
+    return [];
+  }
+}
+
+// ✅ GET ALL CATEGORIES FUNCTION - UPDATED
 export async function getAllCategories(): Promise<Category[]> {
   try {
     console.log('📂 Fetching categories from WordPress...');
@@ -205,9 +250,11 @@ function organizeCategoriesHierarchy(categories: any[]): Category[] {
   return rootCategories;
 }
 
-// ✅ GET POSTS BY CATEGORY
+// ✅ GET POSTS BY CATEGORY - UPDATED
 export async function getPostsByCategory(categorySlug: string): Promise<Post[]> {
   try {
+    console.log(`📂 Fetching posts for category: ${categorySlug}`);
+    
     const allPosts = await getPosts();
     const filteredPosts = allPosts.filter(post => 
       post.categories?.nodes?.some((cat: any) => cat.slug === categorySlug)
@@ -216,7 +263,23 @@ export async function getPostsByCategory(categorySlug: string): Promise<Post[]> 
     console.log(`✅ Found ${filteredPosts.length} posts for category: ${categorySlug}`);
     return filteredPosts;
   } catch (error) {
-    console.error('Error in getPostsByCategory:', error);
+    console.error('❌ Error in getPostsByCategory:', error);
+    return [];
+  }
+}
+
+// ✅ GET FEATURED POSTS - NEW FUNCTION
+export async function getFeaturedPosts(limit: number = 6): Promise<Post[]> {
+  try {
+    console.log('⭐ Fetching featured posts...');
+    
+    const allPosts = await getPosts();
+    const featuredPosts = allPosts.slice(0, limit);
+    
+    console.log(`✅ Retrieved ${featuredPosts.length} featured posts`);
+    return featuredPosts;
+  } catch (error) {
+    console.error('❌ Error fetching featured posts:', error);
     return [];
   }
 }
@@ -224,4 +287,28 @@ export async function getPostsByCategory(categorySlug: string): Promise<Post[]> 
 // ✅ GET ALL POSTS (alias for getPosts)
 export async function getAllPosts(): Promise<Post[]> {
   return await getPosts();
+}
+
+// ✅ HEALTH CHECK - NEW FUNCTION
+export async function checkWordPressHealth(): Promise<boolean> {
+  try {
+    console.log('🏥 Checking WordPress health...');
+    
+    const data = await fetchGraphQL(`
+      query HealthCheck {
+        generalSettings {
+          title
+          description
+        }
+      }
+    `);
+
+    const hasSettings = !!data?.generalSettings;
+    console.log(`✅ WordPress health check: ${hasSettings ? 'HEALTHY' : 'ISSUES'}`);
+    
+    return hasSettings;
+  } catch (error) {
+    console.error('❌ WordPress health check failed:', error);
+    return false;
+  }
 }

@@ -10,8 +10,6 @@ import { ApolloWrapper } from "@/lib/apollo-wrapper";
 import { CookieProvider } from "@/contexts/CookieContext";
 import CookieConsent from "@/components/shared/CookieConsent";
 
-
-
 const inter = Inter({ 
   subsets: ['latin'],
   display: 'swap',
@@ -19,13 +17,17 @@ const inter = Inter({
   preload: true,
 })
 
+// ✅ FIXED: Use absolute URLs for OG images
+const SITE_URL = "https://al-asr.centers.pk";
+const OG_IMAGE_URL = `${SITE_URL}/og-image.png`;
+
 export const metadata: Metadata = {
   title: {
     default: "Al-Asr ( Islamic Service )",
     template: "%s | Al-Asr ( Islamic Service )"
   },
   description: "Islamic Services, Calendar Events, and Community Programs",
-  metadataBase: new URL("https://al-asr.centers.pk"),
+  metadataBase: new URL(SITE_URL),
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -35,11 +37,11 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Al-Asr ( Islamic Service )",
     description: "Islamic Services, Calendar Events, and Community Programs",
-    url: "https://al-asr.centers.pk",
+    url: SITE_URL,
     siteName: "Al-Asr Islamic Service",
     images: [
       {
-        url: "/og-image.png",
+        url: OG_IMAGE_URL, // ✅ FIXED: Absolute URL
         width: 1200,
         height: 630,
         alt: "Al-Asr Islamic Service",
@@ -53,10 +55,10 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Al-Asr ( Islamic Service )",
     description: "Islamic Services, Calendar Events, and Community Programs",
-    images: ["/og-image.png"],
+    images: [OG_IMAGE_URL], // ✅ FIXED: Absolute URL
   },
   robots: { index: true, follow: true },
-  alternates: { canonical: "https://al-asr.centers.pk" },
+  alternates: { canonical: SITE_URL },
   applicationName: "Al-Asr Islamic Service",
   authors: [{ name: "Al-Asr Islamic Service" }],
   generator: "Next.js",
@@ -129,14 +131,20 @@ export default function RootLayout({ children }: RootLayoutProps) {
           href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap"
         />
 
-        {/* ✅ OG + Twitter Meta */}
-        <meta property="og:image" content="https://al-asr.centers.pk/og-image.png" />
+        {/* ✅ OG + Twitter Meta - FIXED: Absolute URLs */}
+        <meta property="og:image" content={OG_IMAGE_URL} />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta property="og:image:type" content="image/png" />
         <meta property="og:image:alt" content="Al-Asr Islamic Service" />
-        <meta name="twitter:image" content="https://al-asr.centers.pk/og-image.png" />
+        <meta name="twitter:image" content={OG_IMAGE_URL} />
         <meta name="twitter:image:alt" content="Al-Asr Islamic Service" />
+        {/* ✅ ADDED: More OG tags for better social media sharing */}
+        <meta property="og:site_name" content="Al-Asr Islamic Service" />
+        <meta property="og:locale" content="ur_PK" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:site" content="@al-asr" />
+        <meta name="twitter:creator" content="@al-asr" />
 
         {/* ✅ Prevent dark-mode filter */}
         <meta name="darkreader-lock" />
@@ -334,26 +342,23 @@ export default function RootLayout({ children }: RootLayoutProps) {
           Install App
         </button>
 
-       
-
-          <CookieProvider>
-            <ThemeProvider>
-              <ApolloWrapper>
-                {/* ✅ LCP OPTIMIZATION - Added lcp-optimize class */}
-                <main 
-                  role="main" 
-                  id="main-content" 
-                  tabIndex={-1} 
-                  className="min-h-screen lcp-optimize"
-                >
-                  {children}
-                </main>
-              </ApolloWrapper>
-            </ThemeProvider>
-            {/* ✅ Cookie Consent Banner */}
-            <CookieConsent />
-          </CookieProvider>
-   
+        <CookieProvider>
+          <ThemeProvider>
+            <ApolloWrapper>
+              {/* ✅ LCP OPTIMIZATION - Added lcp-optimize class */}
+              <main 
+                role="main" 
+                id="main-content" 
+                tabIndex={-1} 
+                className="min-h-screen lcp-optimize"
+              >
+                {children}
+              </main>
+            </ApolloWrapper>
+          </ThemeProvider>
+          {/* ✅ Cookie Consent Banner */}
+          <CookieConsent />
+        </CookieProvider>
 
         {/* ✅ Analytics - Only in production */}
         {process.env.NODE_ENV === 'production' && (
