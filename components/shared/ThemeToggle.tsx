@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Moon, Sun, Monitor, Check } from 'lucide-react';
+import { CustomIcons } from './CustomIcons';
 import { cn } from '@/lib/utils';
 
 export function ThemeToggle() {
@@ -22,9 +22,9 @@ export function ThemeToggle() {
 
   // Theme options with icons and labels
   const themeOptions = [
-    { value: 'light', label: 'Light', icon: Sun },
-    { value: 'dark', label: 'Dark', icon: Moon },
-    { value: 'system', label: 'System', icon: Monitor },
+    { value: 'light', label: 'Light', icon: CustomIcons.Sun },
+    { value: 'dark', label: 'Dark', icon: CustomIcons.Moon },
+    { value: 'system', label: 'System', icon: CustomIcons.Monitor },
   ];
 
   if (!mounted) {
@@ -57,20 +57,20 @@ export function ThemeToggle() {
           aria-label={`Current theme: ${currentTheme.label}. Click to change theme`}
         >
           {/* Sun Icon for Light Theme */}
-          <Sun className={cn(
+          <CustomIcons.Sun className={cn(
             "h-[1.2rem] w-[1.2rem] absolute transition-all duration-300",
             "rotate-0 scale-100 text-amber-500",
             "dark:-rotate-90 dark:scale-0"
           )} />
           
           {/* Moon Icon for Dark Theme */}
-          <Moon className={cn(
+          <CustomIcons.Moon className={cn(
             "h-[1.2rem] w-[1.2rem] absolute transition-all duration-300",
             "rotate-90 scale-0 text-slate-400",
             "dark:rotate-0 dark:scale-100 dark:text-blue-400"
           )} />
           
-          {/* Ripple Effect - Fixed gradient classes */}
+          {/* Ripple Effect */}
           <span className={cn(
             "absolute inset-0 rounded-md transition-all duration-300",
             "bg-amber-200/0",
@@ -115,7 +115,7 @@ export function ThemeToggle() {
               </div>
               
               {isActive && (
-                <Check className="h-4 w-4 text-primary animate-in fade-in duration-200" />
+                <CustomIcons.Check className="h-4 w-4 text-primary animate-in fade-in duration-200" />
               )}
             </DropdownMenuItem>
           );
@@ -163,13 +163,13 @@ export function SimpleThemeSwitch() {
       )}
       aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
     >
-      <Sun className={cn(
+      <CustomIcons.Sun className={cn(
         "h-[1.2rem] w-[1.2rem] absolute transition-all duration-300",
         "rotate-0 scale-100 text-amber-500",
         "dark:-rotate-90 dark:scale-0"
       )} />
       
-      <Moon className={cn(
+      <CustomIcons.Moon className={cn(
         "h-[1.2rem] w-[1.2rem] absolute transition-all duration-300",
         "rotate-90 scale-0 text-slate-400",
         "dark:rotate-0 dark:scale-100 dark:text-blue-400"

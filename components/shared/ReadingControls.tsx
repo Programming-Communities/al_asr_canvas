@@ -1,26 +1,38 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { ZoomIn, ZoomOut, Type, Sun, Moon, Settings } from 'lucide-react';
+
+// Simple emoji-based icons to avoid HMR issues and TypeScript errors
+const Icons = {
+  ZoomIn: '🔍',
+  ZoomOut: '🔎', 
+  Type: '📝',
+  Sun: '☀️',
+  Moon: '🌙',
+  Settings: '⚙️',
+  X: '❌',
+  BookOpen: '📖',
+};
 
 interface ReadingControlsProps {
   onFontSizeChange?: (size: number) => void;
   onThemeChange?: (theme: 'light' | 'dark') => void;
-  currentFontSize?: number; // ✅ ADDED: Accept current values as props
-  currentTheme?: 'light' | 'dark'; // ✅ ADDED: Accept current values as props
+  currentFontSize?: number;
+  currentTheme?: 'light' | 'dark';
 }
 
 const ReadingControls: React.FC<ReadingControlsProps> = ({
   onFontSizeChange,
   onThemeChange,
-  currentFontSize = 100, // ✅ ADDED: Default value
-  currentTheme = 'light' // ✅ ADDED: Default value
+  currentFontSize = 100,
+  currentTheme = 'light'
 }) => {
   const [fontSize, setFontSize] = useState(currentFontSize);
   const [isOpen, setIsOpen] = useState(false);
   const [readingTheme, setReadingTheme] = useState<'light' | 'dark'>(currentTheme);
   const [autoCloseTimer, setAutoCloseTimer] = useState<NodeJS.Timeout | null>(null);
+  const [isScrolled, setIsScrolled] = useState(false);
 
-  // ✅ ADDED: Sync with parent component when props change
+  // Sync with parent component when props change
   useEffect(() => {
     setFontSize(currentFontSize);
   }, [currentFontSize]);
@@ -29,27 +41,39 @@ const ReadingControls: React.FC<ReadingControlsProps> = ({
     setReadingTheme(currentTheme);
   }, [currentTheme]);
 
+  // Scroll detection for professional appearance
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 100);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const fontSizes = [
-    { label: 'A', value: 90, level: 'Small' },
-    { label: 'A', value: 100, level: 'Normal' },
-    { label: 'A+', value: 115, level: 'Large' },
-    { label: 'A++', value: 130, level: 'X-Large' }
+    { label: 'A', value: 80, level: 'XS' },
+    { label: 'A', value: 90, level: 'S' },
+    { label: 'A', value: 100, level: 'M' },
+    { label: 'A+', value: 115, level: 'L' },
+    { label: 'A++', value: 130, level: 'XL' },
+    { label: 'A+++', value: 150, level: 'XXL' }
   ];
 
-  // Auto close after 5 seconds of inactivity
+  // Auto close after 8 seconds of inactivity
   const startAutoCloseTimer = () => {
     if (autoCloseTimer) {
       clearTimeout(autoCloseTimer);
     }
     const timer = setTimeout(() => {
       setIsOpen(false);
-    }, 5000);
+    }, 8000);
     setAutoCloseTimer(timer);
   };
 
   const handleFontSizeChange = (newSize: number) => {
     setFontSize(newSize);
-    onFontSizeChange?.(newSize); // ✅ Call parent callback
+    onFontSizeChange?.(newSize);
     localStorage.setItem('readingFontSize', newSize.toString());
     startAutoCloseTimer();
   };
@@ -57,7 +81,7 @@ const ReadingControls: React.FC<ReadingControlsProps> = ({
   const handleThemeToggle = () => {
     const newTheme = readingTheme === 'light' ? 'dark' : 'light';
     setReadingTheme(newTheme);
-    onThemeChange?.(newTheme); // ✅ Call parent callback
+    onThemeChange?.(newTheme);
     localStorage.setItem('readingTheme', newTheme);
     startAutoCloseTimer();
   };
@@ -81,6 +105,13 @@ const ReadingControls: React.FC<ReadingControlsProps> = ({
     if (!isOpen) {
       startAutoCloseTimer();
     } else if (autoCloseTimer) {
+      clearTimeout(autoCloseTimer);
+    }
+  };
+
+  const closeControls = () => {
+    setIsOpen(false);
+    if (autoCloseTimer) {
       clearTimeout(autoCloseTimer);
     }
   };
@@ -110,146 +141,212 @@ const ReadingControls: React.FC<ReadingControlsProps> = ({
     };
   }, [autoCloseTimer]);
 
-  const currentFontSizeObj = fontSizes.find(size => size.value === fontSize) || fontSizes[1];
+  const currentFontSizeObj = fontSizes.find(size => size.value === fontSize) || fontSizes[2];
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
-      {/* Main Controls Panel */}
+    <div className={`fixed right-4 z-100 transition-all duration-500 ${
+      isScrolled ? 'bottom-4 scale-95' : 'bottom-6 scale-100'
+    }`}>
+      {/* Professional Controls Panel */}
       {isOpen && (
         <div 
-          className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 p-6 mb-3 animate-in fade-in duration-300 slide-in-from-bottom-4"
+          className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50 p-4 mb-3 animate-in fade-in duration-300 slide-in-from-bottom-4 max-w-xs"
           onMouseEnter={() => {
             if (autoCloseTimer) clearTimeout(autoCloseTimer);
           }}
           onMouseLeave={startAutoCloseTimer}
         >
-          {/* Header */}
-          <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200 dark:border-gray-700">
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
-              Reading Settings
-            </h3>
-            <div className="text-xs px-2 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded-full">
-              Auto-close in 5s
+          {/* Professional Header */}
+          <div className="flex items-center justify-between mb-3 pb-3 border-b border-gray-200/60 dark:border-gray-700/60">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 bg-linear-to-br from-red-500 to-red-600 rounded-lg">
+                <span className="text-white text-sm">{Icons.BookOpen}</span>
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-gray-900 dark:text-white">
+                  Reading Mode
+                </h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Customize reading
+                </p>
+              </div>
             </div>
+            <button
+              onClick={closeControls}
+              className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200 group"
+              aria-label="Close reading settings"
+            >
+              <span className="text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300 text-sm">
+                {Icons.X}
+              </span>
+            </button>
           </div>
 
-          {/* Font Size Controls */}
-          <div className="space-y-4">
+          {/* Font Size Section */}
+          <div className="space-y-3 mb-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Text Size
+              <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                Font Size
               </span>
-              <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
-                {currentFontSizeObj.level}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-full">
+                  {currentFontSizeObj.level}
+                </span>
+              </div>
             </div>
             
-            <div className="flex items-center justify-between gap-3">
-              <button
-                onClick={decreaseFontSize}
-                disabled={fontSize === fontSizes[0].value}
-                className="p-3 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center min-w-12 min-h-12"
-                aria-label="Decrease font size"
-              >
-                <ZoomOut className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-              </button>
+            {/* Professional Font Controls */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <button
+                  onClick={decreaseFontSize}
+                  disabled={fontSize === fontSizes[0].value}
+                  className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 text-xs font-medium text-gray-700 dark:text-gray-300 min-w-16 justify-center"
+                  aria-label="Decrease font size"
+                >
+                  <span className="text-xs">{Icons.ZoomOut}</span>
+                  Smaller
+                </button>
 
-              {/* Font Size Indicators */}
-              <div className="flex items-center gap-1 bg-gray-50 dark:bg-gray-900 rounded-xl p-1 flex-1 justify-center">
+                <button
+                  onClick={increaseFontSize}
+                  disabled={fontSize === fontSizes[fontSizes.length - 1].value}
+                  className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 text-xs font-medium text-gray-700 dark:text-gray-300 min-w-16 justify-center"
+                  aria-label="Increase font size"
+                >
+                  Larger
+                  <span className="text-xs">{Icons.ZoomIn}</span>
+                </button>
+              </div>
+
+              {/* Professional Size Indicators */}
+              <div className="grid grid-cols-6 gap-1 bg-gray-50/50 dark:bg-gray-800/50 rounded-lg p-1">
                 {fontSizes.map((size, index) => (
                   <button
                     key={size.value}
                     onClick={() => handleFontSizeChange(size.value)}
-                    className={`px-4 py-3 rounded-lg text-base font-semibold transition-all duration-200 min-w-14 min-h-12 flex items-center justify-center ${
+                    className={`p-1.5 rounded-md text-xs font-semibold transition-all duration-200 flex flex-col items-center justify-center gap-0.5 ${
                       fontSize === size.value
-                        ? 'bg-red-600 text-white shadow-lg scale-105'
-                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:scale-105'
+                        ? 'bg-red-500 text-white shadow scale-105'
+                        : 'text-gray-500 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300 hover:scale-105'
                     }`}
                     aria-label={`Set font size to ${size.level}`}
                   >
-                    {size.label}
-                    {index > 1 && <sup className="text-xs">+</sup>}
-                    {index > 2 && <sup className="text-xs">+</sup>}
+                    <span className="text-[10px]">{size.label}</span>
+                    <span className="text-[6px] opacity-70">{size.level}</span>
                   </button>
                 ))}
               </div>
+            </div>
+          </div>
 
+          {/* Theme Section */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                Theme
+              </span>
+              <span className="text-xs text-gray-500 dark:text-gray-400 capitalize">
+                {readingTheme} Mode
+              </span>
+            </div>
+            
+            <div className="flex gap-2">
               <button
-                onClick={increaseFontSize}
-                disabled={fontSize === fontSizes[fontSizes.length - 1].value}
-                className="p-3 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center min-w-12 min-h-12"
-                aria-label="Increase font size"
+                onClick={() => handleThemeToggle()}
+                className={`flex-1 flex items-center justify-center gap-1 p-2 rounded-lg border transition-all duration-300 ${
+                  readingTheme === 'light'
+                    ? 'border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
+                    : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600'
+                }`}
               >
-                <ZoomIn className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                <span className="text-xs">{Icons.Sun}</span>
+                <span className="text-xs font-medium">Light</span>
+              </button>
+              
+              <button
+                onClick={() => handleThemeToggle()}
+                className={`flex-1 flex items-center justify-center gap-1 p-2 rounded-lg border transition-all duration-300 ${
+                  readingTheme === 'dark'
+                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+                    : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600'
+                }`}
+              >
+                <span className="text-xs">{Icons.Moon}</span>
+                <span className="text-xs font-medium">Dark</span>
               </button>
             </div>
           </div>
 
-          {/* Theme Toggle */}
-          <div className="flex items-center justify-between pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Reading Theme
-            </span>
-            <button
-              onClick={handleThemeToggle}
-              className="relative inline-flex items-center p-2 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-300 min-w-16 min-h-12 group"
-              aria-label={`Switch to ${readingTheme === 'light' ? 'dark' : 'light'} theme`}
-            >
-              <div className="flex items-center gap-2">
-                <Sun className={`w-4 h-4 transition-all duration-300 ${
-                  readingTheme === 'light' 
-                    ? 'text-orange-500 scale-110' 
-                    : 'text-gray-400 scale-100'
-                }`} />
-                <div className="relative w-10 h-6 bg-gray-300 dark:bg-gray-600 rounded-full transition-all duration-300">
-                  <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-300 shadow-lg ${
-                    readingTheme === 'light' ? 'left-1' : 'left-5'
-                  }`} />
-                </div>
-                <Moon className={`w-4 h-4 transition-all duration-300 ${
-                  readingTheme === 'dark' 
-                    ? 'text-blue-400 scale-110' 
-                    : 'text-gray-400 scale-100'
-                }`} />
-              </div>
-            </button>
-          </div>
-
-          {/* Current Settings Summary */}
-          <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-            <div className="text-xs text-center text-gray-500 dark:text-gray-400 space-y-1">
-              <div className="flex justify-between">
-                <span>Size:</span>
-                <span className="font-medium">{currentFontSizeObj.level}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Theme:</span>
-                <span className="font-medium capitalize">{readingTheme}</span>
+          {/* Quick Actions Footer */}
+          <div className="mt-4 pt-3 border-t border-gray-200/60 dark:border-gray-700/60">
+            <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+              <span>Auto-closes in 8s</span>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => handleFontSizeChange(100)}
+                  className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors text-xs"
+                >
+                  Reset
+                </button>
+                <button
+                  onClick={closeControls}
+                  className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors text-xs"
+                >
+                  Apply
+                </button>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Main Toggle Button */}
+      {/* Professional Main Toggle Button - ALWAYS VISIBLE */}
       <button
         onClick={toggleControls}
-        className={`bg-red-600 hover:bg-red-700 text-white p-4 rounded-2xl shadow-2xl transition-all duration-300 ${
+        className={`group relative transition-all duration-300 ${
+          isScrolled 
+            ? 'scale-90 shadow-lg' 
+            : 'scale-100 shadow-xl'
+        } ${
           isOpen 
-            ? 'rotate-45 scale-110 bg-red-700' 
-            : 'hover:scale-110 hover:shadow-3xl'
-        } min-w-14 min-h-14 flex items-center justify-center group relative`}
+            ? 'bg-linear-to-br from-red-600 to-red-700 rotate-90 scale-105' 
+            : 'bg-linear-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700'
+        } rounded-xl p-3 text-white backdrop-blur-sm border border-white/20 hover:scale-105 active:scale-95`}
         aria-label={isOpen ? "Close reading settings" : "Open reading settings"}
+        style={{
+          // Ensure it's always visible
+          opacity: 1,
+          visibility: 'visible',
+          display: 'flex'
+        }}
       >
-        {isOpen ? (
-          <Settings className="w-6 h-6 animate-spin-once" />
-        ) : (
-          <Type className="w-6 h-6" />
-        )}
-        
-        {/* Notification dot for active settings */}
-        {(fontSize !== 100 || readingTheme !== 'light') && !isOpen && (
-          <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white dark:border-gray-800 animate-pulse" />
+        <div className="relative flex items-center justify-center w-5 h-5">
+          {isOpen ? (
+            <span className="text-base animate-spin-once">{Icons.Settings}</span>
+          ) : (
+            <span className="text-base">{Icons.BookOpen}</span>
+          )}
+          
+          {/* Active Settings Indicator */}
+          {(fontSize !== 100 || readingTheme !== 'light') && !isOpen && (
+            <div className="absolute -top-1 -right-1">
+              <div className="relative">
+                <div className="w-2 h-2 bg-green-400 rounded-full animate-ping opacity-75" />
+                <div className="absolute top-0 w-2 h-2 bg-green-500 rounded-full border border-white dark:border-gray-900" />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Hover Tooltip */}
+        {!isOpen && (
+          <div className="absolute right-full mr-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+            <div className="bg-gray-900 text-white text-xs font-medium px-2 py-1 rounded whitespace-nowrap">
+              Reading Settings
+              <div className="absolute left-full top-1/2 transform -translate-y-1/2 border-4 border-transparent border-r-gray-900" />
+            </div>
+          </div>
         )}
       </button>
 
@@ -257,14 +354,22 @@ const ReadingControls: React.FC<ReadingControlsProps> = ({
       <style jsx global>{`
         @keyframes spin-once {
           0% { transform: rotate(0deg); }
-          100% { transform: rotate(180deg); }
+          100% { transform: rotate(90deg); }
         }
         .animate-spin-once {
           animation: spin-once 0.3s ease-in-out;
         }
         
-        .shadow-3xl {
-          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        /* Ensure button is always visible */
+        .reading-controls-button {
+          opacity: 1 !important;
+          visibility: visible !important;
+          display: flex !important;
+        }
+        
+        /* Smooth scrolling for the entire page */
+        html {
+          scroll-behavior: smooth;
         }
       `}</style>
     </div>
