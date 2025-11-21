@@ -5,7 +5,6 @@ import Header from '@/components/layout/Header';
 import { Post } from '@/types/blog';
 import ReadingControls from '@/components/shared/ReadingControls';
 import { useState, useEffect } from 'react';
-import { useApolloClient } from '@apollo/client/react';
 
 // Updated Social Sharing Component
 function PostSocialShareButtons({ title, slug, isRTL }: { 
@@ -19,7 +18,7 @@ function PostSocialShareButtons({ title, slug, isRTL }: {
     if (typeof window !== 'undefined') {
       return `${window.location.origin}/posts/${slug}`;
     }
-    return `/posts/${slug}`;
+    return `https://al-asr.centers.pk/posts/${slug}`;
   };
 
   const shareOnPlatform = (platform: string) => {
@@ -50,6 +49,7 @@ function PostSocialShareButtons({ title, slug, isRTL }: {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
+      // Fallback for older browsers
       const textArea = document.createElement('textarea');
       textArea.value = shareUrl;
       document.body.appendChild(textArea);
@@ -162,7 +162,7 @@ function PostMetaInfo({ post, isRTL }: {
     return `${minutes} min read`;
   };
 
-  // Safe categories access
+  // Safe categories access with type checking
   const categories = post.categories?.nodes || [];
 
   return (
@@ -191,13 +191,16 @@ function PostMetaInfo({ post, isRTL }: {
           <span className={`text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'ml-2' : 'mr-2'}`}>
             Categories:
           </span>
-          {categories.map((category, index) => (
-            <span
+          {categories.map((category: any, index: number) => (
+            <Link
               key={category.slug}
-              className={`inline-block bg-red-900 dark:bg-red-800 text-white text-xs px-3 py-1 rounded-full ${isRTL ? 'ml-2' : 'mr-2'} mb-2 min-h-6 flex items-center`}
+              href={`/categories/${category.slug}`}
+              className={`inline-block bg-red-900 dark:bg-red-800 text-white text-xs px-3 py-1 rounded-full ${
+                isRTL ? 'ml-2' : 'mr-2'
+              } mb-2 min-h-6 flex items-center hover:bg-red-800 dark:hover:bg-red-700 transition-colors duration-200`}
             >
               {category.name}
-            </span>
+            </Link>
           ))}
         </div>
       )}
@@ -216,7 +219,6 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
   const isTitleRTL = isUrdu;
   const isContentRTL = isUrdu;
   const currentIsRTL = isTitleRTL || isContentRTL;
-  const apolloClient = useApolloClient();
 
   const [fontSize, setFontSize] = useState(100);
   const [readingTheme, setReadingTheme] = useState<'light' | 'dark'>('light');
@@ -233,15 +235,59 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
     const root = document.documentElement;
     if (readingTheme === 'dark') {
       root.classList.add('reading-dark');
+      document.body.style.backgroundColor = '#111827';
     } else {
       root.classList.remove('reading-dark');
+      document.body.style.backgroundColor = '';
     }
   }, [readingTheme]);
 
-  // Prefetch related posts when component mounts
+  // Add structured data for rich results
   useEffect(() => {
-    // This will be used for cache prefetching in future
-  }, [apolloClient]);
+    const structuredData = {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": post.title,
+      "description": post.excerpt?.replace(/<[^>]*>/g, '').substring(0, 160) || post.title,
+      "image": post.featuredImage?.node?.sourceUrl || 'https://al-asr.centers.pk/og-image.png',
+      "datePublished": post.date,
+      "dateModified": post.modified || post.date,
+      "author": {
+        "@type": "Person",
+        "name": post.author?.node?.name || "Al-Asr Islamic Service"
+      },
+      "publisher": {
+        "@type": "Organization", 
+        "name": "Al-Asr Islamic Service",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://al-asr.centers.pk/logo.webp"
+        }
+      },
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": `https://al-asr.centers.pk/posts/${slug}`
+      }
+    };
+
+    // Remove existing structured data
+    const existingScript = document.querySelector('script[type="application/ld+json"]');
+    if (existingScript) {
+      existingScript.remove();
+    }
+
+    // Add new structured data
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.text = JSON.stringify(structuredData);
+    document.head.appendChild(script);
+
+    return () => {
+      if (script.parentNode) {
+        script.parentNode.removeChild(script);
+      }
+    };
+  }, [post, slug]);
 
   return (
     <div className={`min-h-screen transition-colors duration-300 ${
@@ -255,19 +301,24 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
         <article
           className="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden"
           dir={currentIsRTL ? "rtl" : "ltr"}
+          itemScope
+          itemType="https://schema.org/Article"
         >
           {/* Featured Image */}
           {post.featuredImage?.node?.sourceUrl && (
-            <div className="w-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
-              <div className="relative w-full h-[500px] mx-auto">
+            <div className="w-full bg-gray-200 dark:bg-gray-700 overflow-hidden" itemProp="image" itemScope itemType="https://schema.org/ImageObject">
+              <div className="relative w-full h-[400px] md:h-[500px] mx-auto">
                 <Image
                   src={post.featuredImage.node.sourceUrl}
                   alt={post.featuredImage.node.altText || post.title}
                   fill
-                  className="object-contain object-center bg-black"
+                  className="object-contain object-center bg-white dark:bg-black"
                   priority
-                  sizes="100vw"
+                  sizes="(max-width: 768px) 100vw, 1200px"
+                  itemProp="url"
                 />
+                <meta itemProp="width" content="1200" />
+                <meta itemProp="height" content="630" />
               </div>
             </div>
           )}
@@ -283,6 +334,7 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
                   ? "'Noto Nastaliq Urdu', 'Noto Sans Arabic', serif" 
                   : "system-ui, -apple-system, sans-serif"
               }}
+              itemProp="headline"
             >
               {post.title}
             </h1>
@@ -303,6 +355,7 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
                 textAlign: currentIsRTL ? 'right' : 'left'
               }}
               dangerouslySetInnerHTML={{ __html: post.content }}
+              itemProp="articleBody"
             />
 
             {/* Updated Social Sharing */}
@@ -315,7 +368,7 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
                 className={`inline-flex items-center font-semibold transition-colors ${
                   currentIsRTL ? 'flex-row-reverse' : ''
                 } ${readingTheme === 'dark' ? 'text-red-400 hover:text-red-300' : 'text-red-900 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300'}`}
-                prefetch={true} // Enable prefetching for instant navigation
+                prefetch={true}
               >
                 <svg
                   className={`${currentIsRTL ? 'ml-2 rotate-180' : 'mr-2'} w-4 h-4`}
@@ -332,7 +385,7 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
         </article>
       </div>
 
-      {/* Reading Controls */}
+      {/* Reading Controls - FIXED: Remove extra props */}
       <ReadingControls 
         onFontSizeChange={setFontSize}
         onThemeChange={setReadingTheme}
@@ -348,6 +401,7 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
         .wp-content p {
           margin-bottom: 1.5rem;
           color: inherit;
+          line-height: inherit;
         }
 
         .wp-content h1, .wp-content h2, .wp-content h3, 
@@ -366,10 +420,35 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
         .wp-content h5 { font-size: 1.25rem; }
         .wp-content h6 { font-size: 1.125rem; }
 
+        .wp-content img {
+          max-width: 100%;
+          height: auto;
+          border-radius: 8px;
+          margin: 1rem 0;
+        }
+
+        .wp-content blockquote {
+          border-left: 4px solid #dc2626;
+          padding-left: 1rem;
+          margin: 1.5rem 0;
+          font-style: italic;
+          color: #6b7280;
+        }
+
+        .wp-content ul, .wp-content ol {
+          margin: 1rem 0;
+          padding-left: 2rem;
+        }
+
+        .wp-content li {
+          margin-bottom: 0.5rem;
+        }
+
         /* Urdu/Arabic Content Styling */
         .urdu-arabic-content {
           font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', 'Scheherazade New', serif;
           text-align: right;
+          line-height: 2;
         }
 
         .urdu-arabic-content h1, 
@@ -388,6 +467,19 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
         .urdu-arabic-content h4 { font-size: 1.6rem; }
         .urdu-arabic-content h5 { font-size: 1.4rem; }
         .urdu-arabic-content h6 { font-size: 1.2rem; }
+
+        .urdu-arabic-content ul, 
+        .urdu-arabic-content ol {
+          padding-right: 2rem;
+          padding-left: 0;
+        }
+
+        .urdu-arabic-content blockquote {
+          border-right: 4px solid #dc2626;
+          border-left: none;
+          padding-right: 1rem;
+          padding-left: 0;
+        }
 
         /* English Content Styling */
         .english-content {
@@ -424,6 +516,11 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
           color: rgb(249 250 251) !important;
         }
 
+        .reading-dark .wp-content blockquote {
+          border-color: #f87171;
+          color: #d1d5db;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
           .wp-content h1 { font-size: 2rem; }
@@ -433,6 +530,20 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
           .urdu-arabic-content h1 { font-size: 2.2rem; }
           .urdu-arabic-content h2 { font-size: 1.9rem; }
           .urdu-arabic-content h3 { font-size: 1.6rem; }
+
+          .wp-content {
+            font-size: 0.95rem;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .wp-content h1 { font-size: 1.75rem; }
+          .wp-content h2 { font-size: 1.5rem; }
+          .wp-content h3 { font-size: 1.25rem; }
+          
+          .urdu-arabic-content h1 { font-size: 1.9rem; }
+          .urdu-arabic-content h2 { font-size: 1.6rem; }
+          .urdu-arabic-content h3 { font-size: 1.4rem; }
         }
       `}</style>
     </div>

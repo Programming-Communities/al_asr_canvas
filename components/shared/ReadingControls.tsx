@@ -5,16 +5,29 @@ import { ZoomIn, ZoomOut, Type, Sun, Moon, Settings } from 'lucide-react';
 interface ReadingControlsProps {
   onFontSizeChange?: (size: number) => void;
   onThemeChange?: (theme: 'light' | 'dark') => void;
+  currentFontSize?: number; // ✅ ADDED: Accept current values as props
+  currentTheme?: 'light' | 'dark'; // ✅ ADDED: Accept current values as props
 }
 
 const ReadingControls: React.FC<ReadingControlsProps> = ({
   onFontSizeChange,
-  onThemeChange
+  onThemeChange,
+  currentFontSize = 100, // ✅ ADDED: Default value
+  currentTheme = 'light' // ✅ ADDED: Default value
 }) => {
-  const [fontSize, setFontSize] = useState(100);
+  const [fontSize, setFontSize] = useState(currentFontSize);
   const [isOpen, setIsOpen] = useState(false);
-  const [readingTheme, setReadingTheme] = useState<'light' | 'dark'>('light');
+  const [readingTheme, setReadingTheme] = useState<'light' | 'dark'>(currentTheme);
   const [autoCloseTimer, setAutoCloseTimer] = useState<NodeJS.Timeout | null>(null);
+
+  // ✅ ADDED: Sync with parent component when props change
+  useEffect(() => {
+    setFontSize(currentFontSize);
+  }, [currentFontSize]);
+
+  useEffect(() => {
+    setReadingTheme(currentTheme);
+  }, [currentTheme]);
 
   const fontSizes = [
     { label: 'A', value: 90, level: 'Small' },
@@ -36,17 +49,17 @@ const ReadingControls: React.FC<ReadingControlsProps> = ({
 
   const handleFontSizeChange = (newSize: number) => {
     setFontSize(newSize);
-    onFontSizeChange?.(newSize);
+    onFontSizeChange?.(newSize); // ✅ Call parent callback
     localStorage.setItem('readingFontSize', newSize.toString());
-    startAutoCloseTimer(); // Reset timer on interaction
+    startAutoCloseTimer();
   };
 
   const handleThemeToggle = () => {
     const newTheme = readingTheme === 'light' ? 'dark' : 'light';
     setReadingTheme(newTheme);
-    onThemeChange?.(newTheme);
+    onThemeChange?.(newTheme); // ✅ Call parent callback
     localStorage.setItem('readingTheme', newTheme);
-    startAutoCloseTimer(); // Reset timer on interaction
+    startAutoCloseTimer();
   };
 
   const decreaseFontSize = () => {
@@ -77,13 +90,16 @@ const ReadingControls: React.FC<ReadingControlsProps> = ({
     const savedFontSize = localStorage.getItem('readingFontSize');
     const savedTheme = localStorage.getItem('readingTheme') as 'light' | 'dark';
     
-    if (savedFontSize) {
-      setFontSize(Number(savedFontSize));
+    if (savedFontSize && !currentFontSize) {
+      const size = Number(savedFontSize);
+      setFontSize(size);
+      onFontSizeChange?.(size);
     }
-    if (savedTheme) {
+    if (savedTheme && !currentTheme) {
       setReadingTheme(savedTheme);
+      onThemeChange?.(savedTheme);
     }
-  }, []);
+  }, [currentFontSize, currentTheme, onFontSizeChange, onThemeChange]);
 
   // Cleanup timer on unmount
   useEffect(() => {
@@ -94,7 +110,7 @@ const ReadingControls: React.FC<ReadingControlsProps> = ({
     };
   }, [autoCloseTimer]);
 
-  const currentFontSize = fontSizes.find(size => size.value === fontSize) || fontSizes[1];
+  const currentFontSizeObj = fontSizes.find(size => size.value === fontSize) || fontSizes[1];
 
   return (
     <div className="fixed bottom-6 right-6 z-50">
@@ -124,7 +140,7 @@ const ReadingControls: React.FC<ReadingControlsProps> = ({
                 Text Size
               </span>
               <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
-                {currentFontSize.level}
+                {currentFontSizeObj.level}
               </span>
             </div>
             
@@ -204,7 +220,7 @@ const ReadingControls: React.FC<ReadingControlsProps> = ({
             <div className="text-xs text-center text-gray-500 dark:text-gray-400 space-y-1">
               <div className="flex justify-between">
                 <span>Size:</span>
-                <span className="font-medium">{currentFontSize.level}</span>
+                <span className="font-medium">{currentFontSizeObj.level}</span>
               </div>
               <div className="flex justify-between">
                 <span>Theme:</span>
