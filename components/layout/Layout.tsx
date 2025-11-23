@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Header from './Header';
 import Footer from './Footer';
+import MobileMenu from '../shared/MobileMenu';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -9,10 +10,24 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isMounted, setIsMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   // Wait for component to mount before showing client-only content
   useEffect(() => {
     setIsMounted(true);
+    
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    if (typeof window !== 'undefined') {
+      checkMobile();
+      window.addEventListener('resize', checkMobile);
+      
+      return () => {
+        window.removeEventListener('resize', checkMobile);
+      };
+    }
   }, []);
 
   return (
@@ -30,10 +45,50 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       )}
 
       <Header />
+      
+      {/* ✅ SIMPLE LAYOUT - NO SIDEBARS */}
       <main className="flex-1 relative">
-        {children}
+        {isMobile ? (
+          // 📱 MOBILE LAYOUT
+          <div className="mobile-content">
+            <div className="container mx-auto px-4 pb-20">
+              {children}
+            </div>
+            
+            {/* BOTTOM MOBILE NAVIGATION */}
+            <nav className="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-gray-900/95 border-t border-gray-200 dark:border-gray-700 z-40 backdrop-blur-sm md:hidden">
+              <div className="flex justify-around items-center py-3">
+                <button className="flex flex-col items-center text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 transition-colors">
+                  <span className="text-2xl">🏠</span>
+                  <span className="text-xs mt-1">Home</span>
+                </button>
+                <button className="flex flex-col items-center text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 transition-colors">
+                  <span className="text-2xl">📚</span>
+                  <span className="text-xs mt-1">Posts</span>
+                </button>
+                <button className="flex flex-col items-center text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 transition-colors">
+                  <span className="text-2xl">🕌</span>
+                  <span className="text-xs mt-1">Services</span>
+                </button>
+                <button className="flex flex-col items-center text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 transition-colors">
+                  <span className="text-2xl">👤</span>
+                  <span className="text-xs mt-1">Menu</span>
+                </button>
+              </div>
+            </nav>
+          </div>
+        ) : (
+          // 💻 DESKTOP LAYOUT - SIMPLE (NO SIDEBARS)
+          <div className="desktop-content">
+            <div className="container mx-auto px-6 py-8">
+              {children}
+            </div>
+          </div>
+        )}
       </main>
+
       <Footer />
+      <MobileMenu />
     </div>
   );
 };

@@ -1,22 +1,25 @@
 "use client";
 import React from "react";
-import {
-  Facebook,
-  Instagram,
-  Twitter,
-  Youtube,
-  Mail,
-  Phone,
-  MapPin,
-  Heart,
-  Shield,
-  Users,
-  Calendar,
-  BookOpen,
-} from "lucide-react";
+import { CustomIcons } from '@/components/shared/CustomIcons';
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
+
+  // Phir component mein use karein like this:
+  const {
+    Facebook,
+    Instagram, 
+    Twitter,
+    Youtube,
+    Mail,
+    Phone,
+    MapPin,
+    Heart,
+    Shield,
+    Users,
+    Calendar,
+    BookOpen
+  } = CustomIcons;
 
   const quickLinks = [
     { name: "Home", href: "/" },

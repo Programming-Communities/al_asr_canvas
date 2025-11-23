@@ -7,8 +7,13 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/react";
 import { ApolloWrapper } from "@/lib/apollo-wrapper";
 
+import ScrollToTop from "@/components/shared/ScrollToTop";
+
+
 import { CookieProvider } from "@/contexts/CookieContext";
 import CookieConsent from "@/components/shared/CookieConsent";
+
+
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -20,6 +25,8 @@ const inter = Inter({
 // ✅ FIXED: Use absolute URLs for OG images
 const SITE_URL = "https://al-asr.centers.pk";
 const OG_IMAGE_URL = `${SITE_URL}/og-image.png`;
+
+
 
 export const metadata: Metadata = {
   title: {
@@ -92,6 +99,23 @@ export default function RootLayout({ children }: RootLayoutProps) {
       data-scroll-behavior="smooth"
     >
       <head>
+        {/* ✅ OPTIMIZED: Conditional preloading - SERVER SIDE COMPATIBLE */}
+        <link
+          rel="preload"
+          href="/logo.webp"
+          as="image"
+          type="image/webp"
+          media="(min-width: 768px)"
+        />
+        <link
+          rel="preload" 
+          href="/fonts/jameel-noori-nastaleeq.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+          media="(min-width: 768px)"
+        />
+        
         {/* ✅ Font preloading for better performance */}
         <link 
           rel="preload" 
@@ -356,6 +380,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
               </main>
             </ApolloWrapper>
           </ThemeProvider>
+          <ScrollToTop />
           {/* ✅ Cookie Consent Banner */}
           <CookieConsent />
         </CookieProvider>
@@ -373,117 +398,86 @@ export default function RootLayout({ children }: RootLayoutProps) {
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
-                let deferredPrompt;
-                let installButton;
-
-                function initializePWA() {
-                  installButton = document.getElementById('install-button');
-                  
-                  if (!installButton) return;
-
-                  // Install button click handler
-                  installButton.addEventListener('click', async function() {
-                    if (deferredPrompt) {
-                      try {
-                        deferredPrompt.prompt();
-                        const choiceResult = await deferredPrompt.userChoice;
-                        
-                        if (choiceResult.outcome === 'accepted') {
-                          hideInstallButton();
-                        }
-                        
-                        deferredPrompt = null;
-                      } catch (error) {
-                        console.error('Error during install prompt:', error);
-                      }
-                    }
-                  });
-
-                  // Check if already installed
-                  if (isPWAInstalled()) {
-                    hideInstallButton();
-                    return;
-                  }
-                }
-
-                // Before install prompt event
-                window.addEventListener('beforeinstallprompt', function(e) {
-                  e.preventDefault();
-                  deferredPrompt = e;
-                  
-                  // Show install button after a short delay
-                  setTimeout(function() {
-                    if (!isPWAInstalled() && deferredPrompt && installButton) {
-                      installButton.style.display = 'flex';
-                      
-                      // Auto-hide after 15 seconds
-                      setTimeout(function() {
-                        if (installButton.style.display !== 'none') {
-                          hideInstallButton();
-                        }
-                      }, 15000);
-                    }
-                  }, 2000);
-                });
-
-                // After app is installed
-                window.addEventListener('appinstalled', function(evt) {
-                  hideInstallButton();
-                  deferredPrompt = null;
-                });
-
-                // Page load event - OPTIMIZED FOR LCP
-                window.addEventListener('load', function() {
-                  initializePWA();
-                  
-                  // Service Worker Registration - DEFERRED FOR LCP
-                  setTimeout(function() {
-                    if ('serviceWorker' in navigator) {
-                      navigator.serviceWorker.register('/sw.js')
-                        .then(function(registration) {
-                          console.log('SW registered: ', registration);
-                        })
-                        .catch(function(registrationError) {
-                          console.log('SW registration failed: ', registrationError);
-                        });
-                    }
-                  }, 1000);
-                });
-
-                function hideInstallButton() {
-                  if (installButton) {
-                    installButton.style.display = 'none';
-                  }
-                }
-
-                function isPWAInstalled() {
-                  return window.matchMedia('(display-mode: standalone)').matches ||
-                         window.navigator.standalone === true;
-                }
-
-                // LCP Optimization - Preload critical image
+                'use strict';
+                
+                // LCP Optimization - IMMEDIATE
                 function optimizeLCP() {
-                  const lcpCandidate = document.querySelector('img[loading="eager"]');
-                  if (lcpCandidate && 'fetch' in window) {
-                    // Preload LCP image
-                    const link = document.createElement('link');
-                    link.rel = 'preload';
-                    link.as = 'image';
-                    link.href = lcpCandidate.src;
-                    document.head.appendChild(link);
+                  // Mark LCP candidate immediately
+                  const lcpCandidate = document.querySelector('img[loading="eager"]') || 
+                                      document.querySelector('h1') ||
+                                      document.querySelector('.hero-section');
+                  
+                  if (lcpCandidate) {
+                    lcpCandidate.setAttribute('data-lcp-candidate', 'true');
+                  }
+                  
+                  // Remove duplicate preloads to avoid warnings
+                  const existingPreloads = document.querySelectorAll('link[rel="preload"]');
+                  existingPreloads.forEach(link => {
+                    const href = link.getAttribute('href');
+                    if (href && (href.includes('/logo.webp') || href.includes('jameel-noori-nastaleeq'))) {
+                      link.remove();
+                    }
+                  });
+                }
+                
+                // Deferred non-critical functionality
+                function loadNonCritical() {
+                  // Service Worker - DEFERRED
+                  if ('serviceWorker' in navigator) {
+                    setTimeout(() => {
+                      navigator.serviceWorker.register('/sw.js')
+                        .catch(console.error);
+                    }, 3000);
+                  }
+                  
+                  // PWA Install Prompt - DEFERRED
+                  let deferredPrompt;
+                  const installButton = document.getElementById('install-button');
+                  
+                  window.addEventListener('beforeinstallprompt', (e) => {
+                    e.preventDefault();
+                    deferredPrompt = e;
+                    
+                    // Show button only after 5 seconds
+                    setTimeout(() => {
+                      if (installButton && deferredPrompt) {
+                        installButton.style.display = 'flex';
+                        
+                        // Auto-hide after 15 seconds
+                        setTimeout(() => {
+                          if (installButton.style.display !== 'none') {
+                            installButton.style.display = 'none';
+                          }
+                        }, 15000);
+                      }
+                    }, 5000);
+                  });
+                  
+                  if (installButton) {
+                    installButton.addEventListener('click', async () => {
+                      if (deferredPrompt) {
+                        deferredPrompt.prompt();
+                        const { outcome } = await deferredPrompt.userChoice;
+                        if (outcome === 'accepted') {
+                          installButton.style.display = 'none';
+                        }
+                        deferredPrompt = null;
+                      }
+                    });
                   }
                 }
-
-                // Initialize when DOM is ready
+                
+                // Execute critical immediately
+                optimizeLCP();
+                
+                // Defer non-critical
                 if (document.readyState === 'loading') {
-                  document.addEventListener('DOMContentLoaded', function() {
-                    initializePWA();
-                    optimizeLCP();
-                  });
+                  document.addEventListener('DOMContentLoaded', loadNonCritical);
                 } else {
-                  initializePWA();
-                  optimizeLCP();
+                  setTimeout(loadNonCritical, 100);
                 }
+                
               })();
             `,
           }}
@@ -493,16 +487,22 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              // Optimize font loading
-              const fontLink = document.querySelector('link[href*="fonts.googleapis.com"]');
-              if (fontLink) {
-                fontLink.onload = function() {
-                  this.media = 'all';
-                };
-              }
-
-              // Enhanced loading state management
+              // Optimize font loading and remove duplicate preloads
               document.addEventListener('DOMContentLoaded', function() {
+                // Remove duplicate font preloads
+                const fontLinks = document.querySelectorAll('link[href*="fonts.googleapis.com"]');
+                if (fontLinks.length > 1) {
+                  for (let i = 1; i < fontLinks.length; i++) {
+                    fontLinks[i].remove();
+                  }
+                }
+                
+                // Set media for font links
+                const googleFontLink = document.querySelector('link[href*="fonts.googleapis.com"]');
+                if (googleFontLink) {
+                  googleFontLink.media = 'all';
+                }
+
                 // Hide any lingering loaders when page is fully loaded
                 setTimeout(function() {
                   const loaders = document.querySelectorAll('[data-loader]');

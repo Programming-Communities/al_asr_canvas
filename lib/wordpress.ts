@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client';
+// lib/wordpress.ts
 import { Post, Category } from '@/types/blog';
 
 // Server-side fetch function with better error handling
@@ -12,15 +12,21 @@ async function fetchGraphQL(query: string, variables?: any) {
   console.log('🔍 Fetching from WordPress:', WORDPRESS_API_URL);
   
   try {
+    // GraphQL request body properly format karein
+    const requestBody = {
+      query: query,
+      variables: variables || {}
+    };
+
+    console.log('📋 GraphQL Query:', query.substring(0, 100) + '...');
+    
     const response = await fetch(WORDPRESS_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
       },
-      body: JSON.stringify({
-        query,
-        variables,
-      }),
+      body: JSON.stringify(requestBody),
       next: { revalidate: 60 }
     });
 
