@@ -305,7 +305,7 @@ export default function PostClient({ post, slug, isUrdu }: PostClientProps) {
           itemType="https://schema.org/Article"
         >
           {/* ✅ OPTIMIZED: Featured Image with LCP Priority */}
-      // Replace the featured image section with this ULTRA-OPTIMIZED version
+      
 {post.featuredImage?.node?.sourceUrl && (
   <div className="w-full bg-gray-100 dark:bg-gray-800 overflow-hidden" itemProp="image" itemScope itemType="https://schema.org/ImageObject">
     <div className="relative w-full h-[300px] md:h-[400px] mx-auto">

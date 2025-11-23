@@ -6,14 +6,9 @@ import PerformanceMonitor from "@/components/PerformanceMonitor";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/react";
 import { ApolloWrapper } from "@/lib/apollo-wrapper";
-<<<<<<< HEAD
-import ScrollToTop from "@/components/shared/ScrollToTop";
-=======
 
 import ScrollToTop from "@/components/shared/ScrollToTop";
 
-
->>>>>>> ef22120e0c5e54b0b40098b04a96c1ac52363231
 import { CookieProvider } from "@/contexts/CookieContext";
 import CookieConsent from "@/components/shared/CookieConsent";
 
