@@ -6,7 +6,7 @@ import PerformanceMonitor from "@/components/PerformanceMonitor";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/react";
 import { ApolloWrapper } from "@/lib/apollo-wrapper";
-
+import ScrollToTop from "@/components/shared/ScrollToTop";
 import { CookieProvider } from "@/contexts/CookieContext";
 import CookieConsent from "@/components/shared/CookieConsent";
 
@@ -356,6 +356,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
               </main>
             </ApolloWrapper>
           </ThemeProvider>
+          <ScrollToTop />
           {/* ✅ Cookie Consent Banner */}
           <CookieConsent />
         </CookieProvider>
