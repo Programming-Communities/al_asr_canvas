@@ -1,37 +1,39 @@
-// app/robots.txt/route.js
 export async function GET() {
-  const baseUrl = 'https://al-asr.centers.pk'
+  const baseUrl = process.env.NODE_ENV === 'production' 
+    ? 'https://al-asr.centers.pk' 
+    : 'http://localhost:3000';
 
   const robotsTxt = `
 User-agent: *
 Allow: /
 
-# 🔒 Block sensitive/admin endpoints
+# Block sensitive areas
 Disallow: /api/
 Disallow: /admin/
 Disallow: /wp-admin/
 Disallow: /wp-json/
-
-# ⚙️ Block framework-internal assets
 Disallow: /_next/
 Disallow: /_vercel/
-Disallow: /private/
-Disallow: /tmp/
 
-# 🧭 Optional: avoid tag or test pages
-Disallow: /tag/
-Disallow: /tags/
-Disallow: /test/
-
-# 🗺️ Sitemap
+# Sitemap
 Sitemap: ${baseUrl}/sitemap.xml
 `.trim()
 
-  return new Response(robotsTxt, {
-    status: 200,
-    headers: {
-      'Content-Type': 'text/plain; charset=utf-8',
-      'Cache-Control': 'public, max-age=86400, s-maxage=86400',
-    },
-  })
+  try {
+    return new Response(robotsTxt, {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'public, max-age=86400',
+      },
+    });
+  } catch (error) {
+    // ✅ FALLBACK: Simple response if error occurs
+    return new Response('User-agent: *\nAllow: /', {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/plain',
+      },
+    });
+  }
 }

@@ -4,7 +4,7 @@ import { getAllCategories } from '@/lib/wordpress';
 import { Category } from '@/types/blog';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ChevronUp, Home, X } from 'lucide-react';
+import { FixedIcons } from '@/components/shared/FixedIcons';
 
 const CategoriesNavbar: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -12,6 +12,25 @@ const CategoriesNavbar: React.FC = () => {
   const [openCategory, setOpenCategory] = useState<string | null>(null);
   const pathname = usePathname();
   const navbarRef = useRef<HTMLDivElement>(null);
+
+  // ✅ SINGLE DESTRUCTURE - Remove the duplicate one
+  const { ChevronUp, X } = FixedIcons;
+  
+  // ✅ SINGLE Home icon definition
+  const Home = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg 
+      width="20" 
+      height="20" 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      stroke="currentColor" 
+      strokeWidth="2"
+      {...props}
+    >
+      <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+      <polyline points="9 22 9 12 15 12 15 22"/>
+    </svg>
+  );
 
   // Fetch categories
   useEffect(() => {

@@ -10,10 +10,10 @@ const nextConfig = {
     ],
     formats: ['image/webp', 'image/avif'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
-    imageSizes: [16, 32, 64, 96, 128, 256],
-    minimumCacheTTL: 86400, // 1 day
+    imageSizes: [16, 32, 48, 64, 96, 128],
+    minimumCacheTTL: 86400,
     dangerouslyAllowSVG: true,
-    qualities: [75, 80, 90],
+    qualities: [65, 70, 75, 80, 90],
   },
 
   // ✅ Compiler optimizations
@@ -24,6 +24,7 @@ const nextConfig = {
   // ✅ Performance optimizations
   poweredByHeader: false,
   compress: true,
+  
 
   // ✅ Security headers
   async headers() {
@@ -33,43 +34,15 @@ const nextConfig = {
         headers: [
           {
             key: 'X-Content-Type-Options',
-            value: 'nosniff',
+            value: 'nosniff'
           },
           {
             key: 'X-Frame-Options',
-            value: 'SAMEORIGIN',
+            value: 'DENY'
           },
           {
             key: 'X-XSS-Protection',
-            value: '1; mode=block',
-          },
-          {
-            key: 'Strict-Transport-Security',
-            value: 'max-age=31536000; includeSubDomains; preload',
-          },
-          {
-            key: 'Content-Security-Policy',
-            value: "default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'",
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin',
-          },
-          {
-            key: 'Permissions-Policy',
-            value: 'geolocation=(), microphone=(), camera=(), fullscreen=(self), payment=()',
-          },
-          {
-            key: 'Cross-Origin-Embedder-Policy',
-            value: 'require-corp',
-          },
-          {
-            key: 'Cross-Origin-Opener-Policy',
-            value: 'same-origin',
-          },
-          {
-            key: 'Cross-Origin-Resource-Policy',
-            value: 'same-origin',
+            value: '1; mode=block'
           },
         ],
       },
@@ -82,9 +55,8 @@ const nextConfig = {
           },
         ],
       },
-      // Cloudflare compatible headers for images
       {
-        source: '/(.*)\\.(jpg|jpeg|png|gif|ico|webp)$',
+        source: '/(.*)\\.(jpg|jpeg|png|gif|ico|webp|svg|avif)$',
         headers: [
           {
             key: 'Cache-Control',
@@ -95,14 +67,13 @@ const nextConfig = {
     ];
   },
 
-  // ✅ Experimental optimizations
-  experimental: {
-    optimizeCss: true,
-    optimizePackageImports: ['lucide-react'],
-  },
+
 
   // ✅ Output standalone for better deployment
   output: 'standalone',
+
+  // ✅ Enable React production mode
+  reactStrictMode: true,
 };
 
 module.exports = nextConfig;

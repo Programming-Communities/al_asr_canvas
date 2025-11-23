@@ -4,40 +4,26 @@ import { getAllCategories, getAllPosts } from '@/lib/wordpress';
 import { Category, Post } from '@/types/blog';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { 
-  X, 
-  ChevronRight, 
-  ChevronDown, 
-  Home, 
-  FolderOpen, 
-  BookOpen,
-  Calendar,
-  Users,
-  Mail,
-  Settings,
-  Sparkles,
-  Heart,
-  GraduationCap,
-  Search,
-  Clock,
-  TrendingUp,
-  Star,
-  Bookmark,
-  Share2,
-  Download
-} from 'lucide-react';
+import { CustomIcons } from '@/components/shared/CustomIcons';
 
 interface SidebarMenuProps {
   isOpen: boolean;
   onClose: () => void;
-  id?: string; // ✅ Optional id prop add karein
+  id?: string;
 }
 
 const SidebarMenu: React.FC<SidebarMenuProps> = ({ 
   isOpen, 
   onClose, 
-  id = "sidebar-menu" // ✅ Default value
+  id = "sidebar-menu"
 }) => {
+  // ✅ SINGLE DESTRUCTURE - Remove duplicate function declaration
+  const {
+    X, ChevronRight, ChevronDown, Home, FolderOpen, BookOpen,
+    Calendar, Users, Mail, Settings, Sparkles, Heart, GraduationCap,
+    Search, Clock, TrendingUp, Star, Bookmark, Share2, Download
+  } = CustomIcons;
+
   const [categories, setCategories] = useState<Category[]>([]);
   const [recentPosts, setRecentPosts] = useState<Post[]>([]);
   const [popularPosts, setPopularPosts] = useState<Post[]>([]);
@@ -143,7 +129,6 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({
 
   return (
     <>
-      {/* ✅ COMPLETELY TRANSPARENT BACKDROP - Only for click to close */}
       {isOpen && (
         <div 
           className="fixed inset-0 z-50 transition-all duration-300"
@@ -151,14 +136,12 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({
         />
       )}
 
-      {/* ✅ COMPLETELY TRANSPARENT SIDEBAR - Website Fully Visible */}
       <div 
-        id={id} // ✅ ID prop applied here
+        id={id}
         className={`fixed top-0 right-0 h-full w-80 bg-white/10 dark:bg-gray-900/10 backdrop-blur-3xl shadow-2xl transform transition-transform duration-500 z-50 flex flex-col border-l border-white/30 ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
-        {/* Header - Semi Transparent */}
         <div className="flex items-center justify-between p-6 border-b border-white/30 bg-white/20 dark:bg-gray-900/20 backdrop-blur-2xl text-white">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-white/30 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/40">
@@ -178,7 +161,6 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({
           </button>
         </div>
 
-        {/* Navigation Tabs - Semi Transparent */}
         <div className="flex border-b border-white/30 bg-white/20 dark:bg-gray-900/20 backdrop-blur-2xl">
           <button
             onClick={() => setActiveTab('menu')}
@@ -212,7 +194,6 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({
           </button>
         </div>
 
-        {/* Search Bar - Semi Transparent */}
         <div className="p-4 border-b border-white/30 bg-white/20 dark:bg-gray-900/20 backdrop-blur-2xl">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/70" />
@@ -226,7 +207,6 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({
           </div>
         </div>
 
-        {/* Quick Actions - Semi Transparent */}
         <div className="p-4 border-b border-white/30 bg-linear-to-b from-white/20 to-white/10 dark:from-gray-900/20 dark:to-gray-900/10 backdrop-blur-2xl">
           <h3 className="font-semibold text-white mb-3 text-sm uppercase tracking-wide drop-shadow">
             Quick Access
@@ -246,10 +226,7 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({
           </div>
         </div>
 
-        {/* Scrollable Content - Semi Transparent */}
         <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-white/30 scrollbar-track-white/10">
-          
-          {/* Menu Tab */}
           {activeTab === 'menu' && (
             <div className="p-4">
               <div className="space-y-2">
@@ -295,7 +272,6 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({
             </div>
           )}
 
-          {/* Categories Tab */}
           {activeTab === 'categories' && (
             <div className="p-4">
               <div className="flex items-center justify-between mb-4">
@@ -365,7 +341,6 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({
                           </div>
                         </div>
 
-                        {/* Sub-categories */}
                         {hasChildren && isExpanded && (
                           <div className="ml-6 space-y-2 border-l-2 border-white/30 pl-4">
                             {category.children!.map((child) => (
@@ -406,10 +381,8 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({
             </div>
           )}
 
-          {/* Posts Tab */}
           {activeTab === 'posts' && (
             <div className="p-4">
-              {/* Recent Posts */}
               <div className="mb-6">
                 <div className="flex items-center space-x-2 mb-4">
                   <Clock className="w-4 h-4 text-white drop-shadow" />
@@ -445,7 +418,6 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({
                 </div>
               </div>
 
-              {/* Popular Posts */}
               <div>
                 <div className="flex items-center space-x-2 mb-4">
                   <TrendingUp className="w-4 h-4 text-white drop-shadow" />
@@ -480,7 +452,6 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({
           )}
         </div>
 
-        {/* ✅ FIXED: Footer with accessible buttons */}
         <div className="p-4 border-t border-white/30 bg-linear-to-t from-white/20 to-transparent backdrop-blur-2xl">
           <div className="text-center">
             <div className="flex justify-center space-x-3 mb-3">
